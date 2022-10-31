@@ -190,6 +190,9 @@ let process: abstractProgram => list(value) =
         switch (pieces) {
         | [] => []
         | [(nom, expr), ...tl] => 
+        /* if definition, check whether name is already bind to value by looking
+        up in environment; if already bind, return error saying name is already
+        bind to value; if not bind, bind name to expression. */
         if (deflookup(tle, nom)) {
           addBinding (tle, (nom, (eval (tle env expr))));
         } else {
@@ -198,7 +201,8 @@ let process: abstractProgram => list(value) =
 
         
         
-        | [expr, ...tl] => /* evaluate expression in environment*/
+        | [expr, ...tl] => 
+        /* if expression, evaluate expression to value.*/
           [eval(tle, env, e), processHelper(tle, tl)]
         }
     processHelper(initialTle, pieces);
