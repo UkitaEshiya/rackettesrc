@@ -161,6 +161,23 @@ let addDefinition: (environment, (name, expression)) => environment =
 let rec stringOfValue: value => string =
   aValue => failwith("stringOfValue is not yet implemented");
 
+
+/*
+Procedure to lookup a definition in the environment, check whether it is already
+bound to a value. Definition is name expression
+*/
+let rec deflookup: (environment, name) => bool =
+  (env, nom) =>
+    switch (env) {
+    | [(key, va), ...tl] =>
+      if (key == nom) {
+        failwith ("name already bind to value");
+      } else {
+        lookup(tl, nom);
+      }
+    | _ => true 
+    };
+        
 /* TODO: write the header comment parts required by the Design Recipe */
 let process: abstractProgram => list(value) =
   pieces => {
@@ -168,27 +185,16 @@ let process: abstractProgram => list(value) =
       (tle, pieces) =>
         switch (pieces) {
         | [] => []
-        | [Definition(d), ...tl] => /*definition is name expression*/
-        {
-        let d = (nom, expr); 
-
-        let rec lookup: (environment, name) => option(value) = 
-          (env, nom) =>
-          switch (env) {
-          | [(key, va), ...tl] =>
-          if (key == nom) {
-            Some(va)
-          } else {
-            lookup(tl, nom)
-          };
-        | _ => None 
-        }; 
-
-        lookup(tle, nom)
-
+        | [(nom, expr), ...tl] => 
+        if (deflookup(tle, nom)) {
+          /* procedure to bind name with expr*/;
+        } else {
+          failwith ("name already bind to value");
         }
+
         
-        | [Expression(e), ...tl] => 
+        
+        | [expr, ...tl] => /* evaluate expression in environment*/
           [eval(tle, env, e), processHelper(tle, tl)]
         }
     processHelper(initialTle, pieces);
