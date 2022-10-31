@@ -133,7 +133,7 @@ let parse: concreteProgram => abstractProgram =
 
 /* TODO: write the header comment parts required by the Design Recipe
  * and implement eval */
-let rec eval: (environment, environment, expression) => value =
+let rec eval: (tolLevelEnvt, localEnvt, expression) => value =
   (tle, env, expr) =>
       switch (exp) {
       | NumE(x) => NumV(x)
@@ -177,7 +177,11 @@ let rec deflookup: (environment, name) => bool =
       }
     | _ => true 
     };
-        
+
+/*procedure to add new binding to environment*/
+let addBinding: (environment, binding) => environment =
+(env, bind) => [bind, ...env]; 
+
 /* TODO: write the header comment parts required by the Design Recipe */
 let process: abstractProgram => list(value) =
   pieces => {
@@ -187,7 +191,7 @@ let process: abstractProgram => list(value) =
         | [] => []
         | [(nom, expr), ...tl] => 
         if (deflookup(tle, nom)) {
-          /* procedure to bind name with expr*/;
+          addBinding (tle, (nom, (eval (tle env expr))));
         } else {
           failwith ("name already bind to value");
         }
