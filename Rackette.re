@@ -112,7 +112,6 @@ let initialTle: environment = [
 cons , first , rest , empty? ,
 cons? , and not ,
 */
-7
 
 /* TODO: write the header comment parts required by the Design Recipe
  * and implement parseExpression */
