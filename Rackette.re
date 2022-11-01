@@ -171,7 +171,7 @@ let rec deflookup: (environment, name) => bool =
     switch (env) {
     | [(key, va), ...tl] =>
       if (key == nom) {
-        failwith ("name already bind to value");
+        failwith ("name already bound to value");
       } else {
         lookup(tl, nom);
       }
