@@ -3,115 +3,12 @@ open Read.Reader;
 open Types;
 
 
-/* procedures for the builtins */
+/* TODO: fill this with your initial top level environment,
+ * consisting of built-in procedures like + or empty? */
 
-  /* I/P: a list of int values
-   * O/P: integer indicating the sum of the values */
-let plus: list(value) => int = numlst => 
-  switch (numlst) {
-    |[NumV(x), NumV(y)] => x+y 
-    |_ => failwith ("invalid input")
-  }; 
+let initialTle: environment =
+[(Name("+"), "<builtin-proc-+>"), (Name("-"), "<builtin-proc-->")] 
 
-  /* I/P: a list of int values
-   * O/P: integer indicating the difference of the values */
-let subtraction: list(value) => int = numlst => 
-  switch (numlst) {
-    |[NumV(x), NumV(y)] => x-y 
-    |_ => failwith ("invalid input")
-  }; 
-
-  /* I/P: a list of int values
-   * O/P: integer indicating the multiple of the values */
-let multiplication: list(value) => int = numlst => 
-  switch (numlst) {
-    |[NumV(x), NumV(y)] => x*y 
-    |_ => failwith ("invalid input")
-  }; 
-
-  /* I/P: a list of int values
-   * O/P: integer indicating the division of the values */
-let division: list(value) => int = numlst => 
-  switch (numlst) {
-    |[NumV(x), NumV(y)] => x/y 
-    |_ => failwith ("invalid input")
-  }; 
-
-  /* I/P: a list of int values
-   * O/P: integer indicating the remainder of the first value divided by the 
-   * second */
-let remi: list(value) => int = numlst => 
-  switch (numlst) {
-    |[NumV(x), NumV(y)] => x mod y 
-    |_ => failwith ("invalid input")
-  }; 
-
-  /* I/P: a list of int values
-   * O/P: boolean indicating whether the two num values are equal */
-let eq: list(value) => bool = numlst => 
-  switch (numlst) {
-    |[NumV(x), NumV(y)] => x == y 
-    |_ => failwith ("invalid input")
-  }; 
-
-  /* I/P: a list of int values
-   * O/P: boolean indicating whether the first int is greater than the second */
-let great: list(value) => bool = numlst => 
-  switch (numlst) {
-    |[NumV(x), NumV(y)] => x > y 
-    |_ => failwith ("invalid input")
-  }; 
-
-  /* I/P: a list of int values
-   * O/P: boolean indicating whether the first int is smaller than the second */
-let small: list(value) => bool = numlst => 
-  switch (numlst) {
-    |[NumV(x), NumV(y)] => x < y 
-    |_ => failwith ("invalid input")
-  }; 
-
-/* InitialTle as a list of bindings */
-let initialTle: environment = [
-  (
-    Name("+"), BuiltinV({printedRep: "<builtin-proc-+>", bProc: plus})
-  ),
-  (
-    Name("-"),
-    BuiltinV({printedRep: "<builtin-proc-->", bProc: subtraction}),
-  ),
-  (
-    Name("*"),
-    BuiltinV({printedRep: "<builtin-proc-*>", bProc: multiplication}),
-  ),
-  (
-    Name("/"),
-    BuiltinV({printedRep: "<builtin-proc-/>", bProc: division}),
-  ),
-  (
-    Name("remainder"),
-    BuiltinV({printedRep: "<builtin-proc-rem>", bProc: remi}),
-  ),
-  (
-    Name("="),
-    BuiltinV({printedRep: "<builtin-proc-=>", bProc: eq}),
-  ),
-  (
-    Name(">"),
-    BuiltinV({printedRep: "<builtin-proc->>", bProc: great}),
-  ),
-  (
-    Name("<"),
-    BuiltinV({printedRep: "<builtin-proc-<>", bProc: small}),
-  ),
-];
-
-
-/*
-+ , - , * , / , remainder , = , < , > , <= , >= , equal? , number? , zero? , 
-cons , first , rest , empty? ,
-cons? , and not ,
-*/
-7
 /* TODO: write the header comment parts required by the Design Recipe
  * and implement parseExpression */
 let rec parseExpression: concreteProgramPiece => expression =
@@ -206,7 +103,7 @@ let process: abstractProgram => list(value) =
         | [(nom, expr), ...tl] => 
         /* if definition, check whether name is already bind to value by looking
         up in environment; if already bind, return error saying name is already
-        bind to value; if not bind, bind name to expression. */ 
+        bind to value; if not bind, bind name to expression. */
         if {
           switch(deflookup(tle, nom)){
           | None => true
@@ -217,12 +114,12 @@ let process: abstractProgram => list(value) =
         } else {
           failwith ("name already bind to value");
         }
-      /* recursive call for processhelper tl of list, then helper for add definition*/
+
         
         
         | [expr, ...tl] => 
         /* if expression, evaluate expression to value.*/
-          [eval(tle, env, e), ... processHelper(tle, tl)]
+          [eval(tle, env, e), processHelper(tle, tl)]
         }
     processHelper(initialTle, pieces);
   };
