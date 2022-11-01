@@ -9,6 +9,8 @@ open Types;
 let initialTle: environment => value =
 env => BuiltinV(builtinData); 
 
+  /* I/P: a list of int values
+   * O/P: integer indicating the sum of the values */
 let plus: list(value) => int = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => x+y 
@@ -19,7 +21,8 @@ let add = {
   printedRep: "<builtin-proc-+>", 
   bProc: plus}; 
 
-
+  /* I/P: a list of int values
+   * O/P: integer indicating the difference of the values */
 let subtraction: list(value) => int = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => x-y 
@@ -30,7 +33,8 @@ let sub = {
   printedRep: "<builtin-proc-->", 
   bProc: subtraction};   
 
-
+  /* I/P: a list of int values
+   * O/P: integer indicating the multiple of the values */
 let multiplication: list(value) => int = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => x*y 
@@ -41,7 +45,8 @@ let mul = {
   printedRep: "<builtin-proc-*>", 
   bProc: multiplication}; 
 
-
+  /* I/P: a list of int values
+   * O/P: integer indicating the division of the values */
 let division: list(value) => int = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => x/y 
@@ -52,7 +57,9 @@ let div = {
   printedRep: "<builtin-proc-/>", 
   bProc: division}; 
 
-
+  /* I/P: a list of int values
+   * O/P: integer indicating the remainder of the first value divided by the 
+   * second */
 let remi: list(value) => int = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => x mod y 
@@ -63,8 +70,9 @@ let rem = {
   printedRep: "<builtin-proc-rem>", 
   bProc: remi};
 
-
-let eq: list(value) => int = numlst => 
+  /* I/P: a list of int values
+   * O/P: boolean indicating whether the two num values are equal */
+let eq: list(value) => bool = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => x == y 
     |_ => failwith ("invalid input")
@@ -74,8 +82,9 @@ let equa = {
   printedRep: "<builtin-proc-=>", 
   bProc: eq}; 
 
-
-let great: list(value) => int = numlst => 
+  /* I/P: a list of int values
+   * O/P: boolean indicating whether the first int is greater than the second */
+let great: list(value) => bool = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => x > y 
     |_ => failwith ("invalid input")
@@ -85,8 +94,9 @@ let greater = {
   printedRep: "<builtin-proc->>", 
   bProc: great}; 
 
-
-let small: list(value) => int = numlst => 
+  /* I/P: a list of int values
+   * O/P: boolean indicating whether the first int is smaller than the second */
+let small: list(value) => bool = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => x < y 
     |_ => failwith ("invalid input")
