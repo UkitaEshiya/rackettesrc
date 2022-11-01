@@ -3,11 +3,7 @@ open Read.Reader;
 open Types;
 
 
-/* TODO: fill this with your initial top level environment,
- * consisting of built-in procedures like + or empty? */
-
-let initialTle: environment => value =
-env => BuiltinV(builtinData); 
+/* procedures for the builtins */
 
   /* I/P: a list of int values
    * O/P: integer indicating the sum of the values */
@@ -17,10 +13,6 @@ let plus: list(value) => int = numlst =>
     |_ => failwith ("invalid input")
   }; 
 
-let add = {
-  printedRep: "<builtin-proc-+>", 
-  bProc: plus}; 
-
   /* I/P: a list of int values
    * O/P: integer indicating the difference of the values */
 let subtraction: list(value) => int = numlst => 
@@ -28,10 +20,6 @@ let subtraction: list(value) => int = numlst =>
     |[NumV(x), NumV(y)] => x-y 
     |_ => failwith ("invalid input")
   }; 
-
-let sub = {
-  printedRep: "<builtin-proc-->", 
-  bProc: subtraction};   
 
   /* I/P: a list of int values
    * O/P: integer indicating the multiple of the values */
@@ -41,10 +29,6 @@ let multiplication: list(value) => int = numlst =>
     |_ => failwith ("invalid input")
   }; 
 
-let mul = {
-  printedRep: "<builtin-proc-*>", 
-  bProc: multiplication}; 
-
   /* I/P: a list of int values
    * O/P: integer indicating the division of the values */
 let division: list(value) => int = numlst => 
@@ -52,10 +36,6 @@ let division: list(value) => int = numlst =>
     |[NumV(x), NumV(y)] => x/y 
     |_ => failwith ("invalid input")
   }; 
-
-let div = {
-  printedRep: "<builtin-proc-/>", 
-  bProc: division}; 
 
   /* I/P: a list of int values
    * O/P: integer indicating the remainder of the first value divided by the 
@@ -66,10 +46,6 @@ let remi: list(value) => int = numlst =>
     |_ => failwith ("invalid input")
   }; 
 
-let rem = {
-  printedRep: "<builtin-proc-rem>", 
-  bProc: remi};
-
   /* I/P: a list of int values
    * O/P: boolean indicating whether the two num values are equal */
 let eq: list(value) => bool = numlst => 
@@ -77,10 +53,6 @@ let eq: list(value) => bool = numlst =>
     |[NumV(x), NumV(y)] => x == y 
     |_ => failwith ("invalid input")
   }; 
-
-let equa = {
-  printedRep: "<builtin-proc-=>", 
-  bProc: eq}; 
 
   /* I/P: a list of int values
    * O/P: boolean indicating whether the first int is greater than the second */
@@ -90,10 +62,6 @@ let great: list(value) => bool = numlst =>
     |_ => failwith ("invalid input")
   }; 
 
-let greater = {
-  printedRep: "<builtin-proc->>", 
-  bProc: great}; 
-
   /* I/P: a list of int values
    * O/P: boolean indicating whether the first int is smaller than the second */
 let small: list(value) => bool = numlst => 
@@ -102,10 +70,40 @@ let small: list(value) => bool = numlst =>
     |_ => failwith ("invalid input")
   }; 
 
-let lesser = {
-  printedRep: "<builtin-proc-<>", 
-  bProc: small}; 
-
+/* InitialTle as a list of bindings */
+let initialTle: environment = [
+  (
+    Name("+"), BuiltinV({printedRep: "<builtin-proc-+>", bProc: plus})
+  ),
+  (
+    Name("-"),
+    BuiltinV({printedRep: "<builtin-proc-->", bProc: subtraction}),
+  ),
+  (
+    Name("*"),
+    BuiltinV({printedRep: "<builtin-proc-*>", bProc: multiplication}),
+  ),
+  (
+    Name("/"),
+    BuiltinV({printedRep: "<builtin-proc-/>", bProc: division}),
+  ),
+  (
+    Name("remainder"),
+    BuiltinV({printedRep: "<builtin-proc-rem>", bProc: remi}),
+  ),
+  (
+    Name("="),
+    BuiltinV({printedRep: "<builtin-proc-=>", bProc: eq}),
+  ),
+  (
+    Name(">"),
+    BuiltinV({printedRep: "<builtin-proc->>", bProc: great}),
+  ),
+  (
+    Name("<"),
+    BuiltinV({printedRep: "<builtin-proc-<>", bProc: small}),
+  ),
+];
 
 
 /*
@@ -208,7 +206,7 @@ let process: abstractProgram => list(value) =
         | [(nom, expr), ...tl] => 
         /* if definition, check whether name is already bind to value by looking
         up in environment; if already bind, return error saying name is already
-        bind to value; if not bind, bind name to expression. */
+        bind to value; if not bind, bind name to expression. */ 
         if {
           switch(deflookup(tle, nom)){
           | None => true
@@ -219,12 +217,12 @@ let process: abstractProgram => list(value) =
         } else {
           failwith ("name already bind to value");
         }
-
+      /* recursive call for processhelper tl of list, then helper for add definition*/
         
         
         | [expr, ...tl] => 
         /* if expression, evaluate expression to value.*/
-          [eval(tle, env, e), processHelper(tle, tl)]
+          [eval(tle, env, e), ... processHelper(tle, tl)]
         }
     processHelper(initialTle, pieces);
   };
