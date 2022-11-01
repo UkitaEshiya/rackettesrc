@@ -28,7 +28,7 @@ let subtraction: list(value) => int = numlst =>
 
 let sub = {
   printedRep: "<builtin-proc-->", 
-  bProc: subtraction};   
+  bProc: subtraction}; 
 
 
 let multiplication: list(value) => int = numlst => 
@@ -139,11 +139,10 @@ let rec eval: (tolLevelEnvt, localEnvt, expression) => value =
       | NumE(x) => NumV(x)
       | BoolE(bool) => BoolV(bool)
       | EmptyE => []
-      | NameE(name) => /* return value bound to name */
-      | AndE(expression, expression) => /* rule to how to evaluate and*/
-      | OrE(expression, expression) => /* rule to how to evaluate or*/
-      | IfE(ifData) => /* evaluate predicate, if true then evaluate first; if 
-      false then evaluate no expression */ 
+      | NameE(name) 
+      | AndE(expression, expression) 
+      | OrE(expression, expression)
+      | IfE(ifData)
       | CondE(list(condData)) 
       | LambdaE(lambdaData)
       | LetE(letData)
@@ -167,18 +166,17 @@ let rec stringOfValue: value => string =
 Procedure to lookup a definition in the environment, check whether it is already
 bound to a value. Definition is name expression
 */
-let rec deflookup: (environment, name) => option =
+let rec deflookup: (environment, name) => bool =
   (env, nom) =>
     switch (env) {
     | [(key, va), ...tl] =>
       if (key == nom) {
-        Some(va);
+        failwith ("name already bound to value");
       } else {
         lookup(tl, nom);
       }
-    | _ => None
+    | _ => true 
     };
-
 
 /*procedure to add new binding to environment*/
 let addBinding: (environment, binding) => environment =
@@ -195,13 +193,8 @@ let process: abstractProgram => list(value) =
         /* if definition, check whether name is already bind to value by looking
         up in environment; if already bind, return error saying name is already
         bind to value; if not bind, bind name to expression. */
-        if {
-          switch(deflookup(tle, nom)){
-          | None => true
-          | Some(result) => false
-        }; 
-        } {
-          addDefinition(nom, tle); 
+        if (deflookup(tle, nom)) {
+          addBinding (tle, (nom, (eval (tle env expr))));
         } else {
           failwith ("name already bind to value");
         }
