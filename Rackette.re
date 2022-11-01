@@ -113,14 +113,7 @@ cons , first , rest , empty? ,
 cons? , and not ,
 */
 7
-=======
-/* TODO: fill this with your initial top level environment,
- * consisting of built-in procedures like + or empty? */
 
-let initialTle: environment =
-[(Name("+"), "<builtin-proc-+>"), (Name("-"), "<builtin-proc-->")] 
-
->>>>>>> f325ab91f39c206f9aced99dce9d39960c56beff
 /* TODO: write the header comment parts required by the Design Recipe
  * and implement parseExpression */
 let rec parseExpression: concreteProgramPiece => expression =
