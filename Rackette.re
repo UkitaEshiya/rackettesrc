@@ -3,71 +3,145 @@ open Read.Reader;
 open Types;
 
 
-<<<<<<< HEAD
 /* procedures for the builtins */
 
-  /* I/P: a list of int values
-   * O/P: integer indicating the sum of the values */
-let plus: list(value) => int = numlst => 
+/* for all output specifications, a failwith "invalid input" will be returned
+if the input does not fit the requirements of the builtin procedure. */
+
+  /* I/P: a list of two int values
+   * O/P: integer value indicating the sum of the values */
+let plus: list(value) => value = numlst => 
   switch (numlst) {
-    |[NumV(x), NumV(y)] => x+y 
+    |[NumV(x), NumV(y)] => NumV(x+y)
     |_ => failwith ("invalid input")
   }; 
 
-  /* I/P: a list of int values
-   * O/P: integer indicating the difference of the values */
-let subtraction: list(value) => int = numlst => 
+  /* I/P: a list of two int values
+   * O/P: integer value indicating the difference of the values */
+let subtraction: list(value) => value = numlst => 
   switch (numlst) {
-    |[NumV(x), NumV(y)] => x-y 
+    |[NumV(x), NumV(y)] => NumV(x-y) 
     |_ => failwith ("invalid input")
   }; 
 
-  /* I/P: a list of int values
-   * O/P: integer indicating the multiple of the values */
-let multiplication: list(value) => int = numlst => 
+  /* I/P: a list of two int values
+   * O/P: integer value indicating the multiple of the values */
+let multiplication: list(value) => value = numlst => 
   switch (numlst) {
-    |[NumV(x), NumV(y)] => x*y 
+    |[NumV(x), NumV(y)] => NumV(x*y)
     |_ => failwith ("invalid input")
   }; 
 
-  /* I/P: a list of int values
-   * O/P: integer indicating the division of the values */
-let division: list(value) => int = numlst => 
+  /* I/P: a list of two int values
+   * O/P: integer value indicating the division of the values */
+let division: list(value) => value = numlst => 
   switch (numlst) {
-    |[NumV(x), NumV(y)] => x/y 
+    |[NumV(x), NumV(y)] => NumV(x/y)
     |_ => failwith ("invalid input")
   }; 
 
-  /* I/P: a list of int values
-   * O/P: integer indicating the remainder of the first value divided by the 
+  /* I/P: a list of two int values
+   * O/P: integer value indicating the remainder of the first value divided by 
+   * the second */
+let remi: list(value) => value = numlst => 
+  switch (numlst) {
+    |[NumV(x), NumV(y)] => NumV(x mod y)
+    |_ => failwith ("invalid input")
+  }; 
+
+  /* I/P: a list of two int values
+   * O/P: boolean value indicating whether the two num values are equal */
+let eq: list(value) => value = numlst => 
+  switch (numlst) {
+    |[NumV(x), NumV(y)] => BoolV(x == y)
+    |_ => failwith ("invalid input")
+  }; 
+
+  /* I/P: a list of two int values
+   * O/P: boolean value indicating whether the first int is greater than the 
    * second */
-let remi: list(value) => int = numlst => 
+let great: list(value) => value = numlst => 
   switch (numlst) {
-    |[NumV(x), NumV(y)] => x mod y 
+    |[NumV(x), NumV(y)] => BoolV(x > y)
     |_ => failwith ("invalid input")
   }; 
 
-  /* I/P: a list of int values
-   * O/P: boolean indicating whether the two num values are equal */
-let eq: list(value) => bool = numlst => 
+  /* I/P: a list of two int values
+   * O/P: boolean value indicating whether the first int is smaller than the 
+   * second */
+let small: list(value) => value = numlst => 
   switch (numlst) {
-    |[NumV(x), NumV(y)] => x == y 
+    |[NumV(x), NumV(y)] => BoolV(x < y)
     |_ => failwith ("invalid input")
   }; 
 
-  /* I/P: a list of int values
-   * O/P: boolean indicating whether the first int is greater than the second */
-let great: list(value) => bool = numlst => 
+  /* I/P: a list of two int values
+   * O/P: boolean value indicating whether the first int is smaller than the 
+   * second */
+let small: list(value) => value = numlst => 
   switch (numlst) {
-    |[NumV(x), NumV(y)] => x > y 
+    |[NumV(x), NumV(y)] => BoolV(x < y)
     |_ => failwith ("invalid input")
   }; 
 
-  /* I/P: a list of int values
-   * O/P: boolean indicating whether the first int is smaller than the second */
-let small: list(value) => bool = numlst => 
+  /* I/P: a list of two int values
+   * O/P: boolean value indicating whether the first int is greater than or 
+   * equal to the second */
+let greq: list(value) => value = numlst => 
   switch (numlst) {
-    |[NumV(x), NumV(y)] => x < y 
+    |[NumV(x), NumV(y)] => BoolV(x >= y)
+    |_ => failwith ("invalid input")
+  }; 
+
+  /* I/P: a list of two int values
+   * O/P: boolean value indicating whether the first int is smaller than or 
+   * equal to the second */
+let smeq: list(value) => value = numlst => 
+  switch (numlst) {
+    |[NumV(x), NumV(y)] => BoolV(x <= y)
+    |_ => failwith ("invalid input")
+  }; 
+
+  /* I/P: a list of two 'a values
+   * O/P: boolean value indicating whether the two values are "structually
+   * equal" */
+let equality: list(value) => value = alst => 
+  switch (alst) {
+    |[NumV(x), NumV(y)] => BoolV(x === y)
+    |[BoolV(x), BoolV(y)] => BoolV(x === y)
+    |[ListV(x), ListV(y)] => BoolV(x === y)
+    |[BuiltinV(x), BuiltinV(y)] => BoolV(x === y)
+    |[ClosureV(x), ClosureV(y)] => BoolV(x === y)
+    |[_, _] => BoolV(false)
+    |_ => failwith ("invalid input")
+  }; /* might need to evaluate when its a BuiltinV and ClosureV to check for the 
+  equality of the values indicated by the data */
+
+  /* I/P: a value
+   * O/P: boolean value indicating whether the input is a num value */
+let isnum: value => value = va => 
+  switch (va) {
+    |NumV(_) => BoolV(true)
+    |_ => BoolV(false)
+    |[_hd, ..._tl] => failwith ("invalid input")
+  }; 
+
+  /* I/P: a value
+   * O/P: boolean value indicating whether the input is a zero */
+let iszero: value => value = va => 
+  switch (va) {
+    |NumV(0) => BoolV(true)
+    |NumV(_) => BoolV(false)
+    |_ => failwith ("invalid input")
+  }; 
+
+  /* I/P: two values
+   * O/P: a list value consisting of the first value followed by the second 
+   * value composed in a list */
+let iszero: value => value = va => 
+  switch (va) {
+    |NumV(0) => BoolV(true)
+    |NumV(_) => BoolV(false)
     |_ => failwith ("invalid input")
   }; 
 
@@ -110,7 +184,7 @@ let initialTle: environment = [
 /*
 + , - , * , / , remainder , = , < , > , <= , >= , equal? , number? , zero? , 
 cons , first , rest , empty? ,
-cons? , and not ,
+cons? , not 
 */
 
 /* TODO: write the header comment parts required by the Design Recipe
