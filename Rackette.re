@@ -90,7 +90,7 @@ let greq: list(value) => value = numlst =>
 let smeq: list(value) => value = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => BoolV(x <= y)
-    |_ => failwith ("invalid input")
+    |_ => failwith ("invalid input less than or equal to")
   }; 
 
   /* I/P: a list of two 'a values
@@ -102,7 +102,7 @@ let equality: list(value) => value = alst =>
     |[BoolV(x), BoolV(y)] => BoolV(x === y)
     |[ListV(x), ListV(y)] => BoolV(x === y)
     |[_, _] => BoolV(false) 
-    |_ => failwith ("invalid input")
+    |_ => failwith ("invalid input equality")
   }; /* might need to evaluate when its a BuiltinV and ClosureV to check for the 
   equality of the values indicated by the data */
 
@@ -112,7 +112,7 @@ let isnum: value => value = va =>
   switch (va) {
     |NumV(_) => BoolV(true)
     |_ => BoolV(false)
-    |[_hd, ..._tl] => failwith ("invalid input")
+    |[_hd, ..._tl] => failwith ("invalid input is input num")
   }; 
 
   /* I/P: a value
@@ -121,20 +121,63 @@ let iszero: value => value = va =>
   switch (va) {
     |NumV(0) => BoolV(true)
     |NumV(_) => BoolV(false)
-    |_ => failwith ("invalid input")
+    |_ => failwith ("invalid input is input zero")
   }; 
 
-  /* I/P: two values
+  /* I/P: two values, the second must be a list
    * O/P: a list value consisting of the first value followed by the second 
    * value composed in a list */
-let iszero: value => value = va => 
-  switch (va) {
-    |NumV(0) => BoolV(true)
-    |NumV(_) => BoolV(false)
-    |_ => failwith ("invalid input")
+let contain: (value, value) => value = (item, lst) => 
+  switch (lst) {
+    |ListV([]) => ListV([item])
+    |ListV([_hd, ..._tl]) => ListV([item, _hd, ..._tl])
+    |_ => failwith ("invalid input second item must be list")
   }; 
 
+  /* I/P: a list value
+   * O/P: first item value of the list */
+let firstlst: value => value = lst => 
+  switch (lst) {
+    |ListV([]) => failwith ("invalid input first cannot be empty list")
+    |ListV([hd, ..._tl]) => hd
+    |_ => failwith ("invalid input input must be a list")
+  }; 
 
+  /* I/P: a list value
+   * O/P: the list except for the first item */
+let restlst: value => value = lst => 
+  switch (lst) {
+    |ListV([]) => failwith ("invalid input first cannot be empty list")
+    |ListV([_hd, ...tl]) => ListV(tl)
+    |_ => failwith ("invalid input input must be a list")
+  }; 
+
+  /* I/P: a list value
+   * O/P: a boolean value indicate whether the list is empty */
+let isempty: value => value = lst => 
+  switch (lst) {
+    |ListV([]) => BoolV(true)
+    |ListV([_hd, ..._tl]) => BoolV(false)
+    |_ => failwith ("invalid input input must be a list")
+  }; 
+
+  /* I/P: a list value
+   * O/P: a boolean value indicate whether the list has item in there */
+let iscons: value => value = lst => 
+  switch (lst) {
+    |ListV([]) => BoolV(false)
+    |ListV([_hd, ..._tl]) => BoolV(true)
+    |_ => failwith ("invalid input input must be a list")
+  }; 
+
+  /* I/P: a boolean value
+   * O/P: the opposite boolean value */
+let isnot: value => value = va => 
+  switch (lst) {
+    |BooV(true) => BoolV(false)
+    |BoolV(false) => BoolV(true)
+    |_ => failwith ("invalid input input must be a boolean")
+  }; 
 
 /* InitialTle as a list of bindings */
 let initialTle: environment = [
@@ -168,6 +211,50 @@ let initialTle: environment = [
   (
     Name("<"),
     BuiltinV({printedRep: "<builtin-proc-<>", bProc: small}),
+  ),
+  (
+    Name("<="),
+    BuiltinV({printedRep: "<builtin-proc-<=>", bProc: greq}),
+  ),
+  (
+    Name(">="),
+    BuiltinV({printedRep: "<builtin-proc->=>", bProc: smeq}),
+  ),
+  (
+    Name("equal?"),
+    BuiltinV({printedRep: "<builtin-proc-equal?>", bProc: equality}),
+  ),
+  (
+    Name("number?"),
+    BuiltinV({printedRep: "<builtin-proc-number?>", bProc: isnum}),
+  ),
+  (
+    Name("zero?"),
+    BuiltinV({printedRep: "<builtin-proc-zero?>", bProc: iszero}),
+  ),
+  (
+    Name("cons"),
+    BuiltinV({printedRep: "<builtin-proc-cons>", bProc: contain}),
+  ),
+  (
+    Name("first"),
+    BuiltinV({printedRep: "<builtin-proc-first>", bProc: firstlst}),
+  ),
+  (
+    Name("rest"),
+    BuiltinV({printedRep: "<builtin-proc-rest>", bProc: restlst}),
+  ),
+  (
+    Name("empty?"),
+    BuiltinV({printedRep: "<builtin-proc-empty?>", bProc: isempty}),
+  ),
+  (
+    Name("cons?"),
+    BuiltinV({printedRep: "<builtin-proc-cons?>", bProc: iscons}),
+  ),
+  (
+    Name("not"),
+    BuiltinV({printedRep: "<builtin-proc-not>", bProc: isnot}),
   ),
 ];
 
