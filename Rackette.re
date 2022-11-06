@@ -13,7 +13,7 @@ if the input does not fit the requirements of the builtin procedure. */
 let plus: list(value) => value = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => NumV(x+y)
-    |_ => failwith ("invalid input")
+    |_ => failwith ("invalid input addition")
   }; 
 
   /* I/P: a list of two int values
@@ -21,7 +21,7 @@ let plus: list(value) => value = numlst =>
 let subtraction: list(value) => value = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => NumV(x-y) 
-    |_ => failwith ("invalid input")
+    |_ => failwith ("invalid input subtraction")
   }; 
 
   /* I/P: a list of two int values
@@ -29,7 +29,7 @@ let subtraction: list(value) => value = numlst =>
 let multiplication: list(value) => value = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => NumV(x*y)
-    |_ => failwith ("invalid input")
+    |_ => failwith ("invalid input multiplication")
   }; 
 
   /* I/P: a list of two int values
@@ -37,7 +37,7 @@ let multiplication: list(value) => value = numlst =>
 let division: list(value) => value = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => NumV(x/y)
-    |_ => failwith ("invalid input")
+    |_ => failwith ("invalid input division")
   }; 
 
   /* I/P: a list of two int values
@@ -46,7 +46,7 @@ let division: list(value) => value = numlst =>
 let remi: list(value) => value = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => NumV(x mod y)
-    |_ => failwith ("invalid input")
+    |_ => failwith ("invalid input remainder")
   }; 
 
   /* I/P: a list of two int values
@@ -54,7 +54,7 @@ let remi: list(value) => value = numlst =>
 let eq: list(value) => value = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => BoolV(x == y)
-    |_ => failwith ("invalid input")
+    |_ => failwith ("invalid input num equal")
   }; 
 
   /* I/P: a list of two int values
@@ -63,7 +63,7 @@ let eq: list(value) => value = numlst =>
 let great: list(value) => value = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => BoolV(x > y)
-    |_ => failwith ("invalid input")
+    |_ => failwith ("invalid input greater than")
   }; 
 
   /* I/P: a list of two int values
@@ -72,16 +72,7 @@ let great: list(value) => value = numlst =>
 let small: list(value) => value = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => BoolV(x < y)
-    |_ => failwith ("invalid input")
-  }; 
-
-  /* I/P: a list of two int values
-   * O/P: boolean value indicating whether the first int is smaller than the 
-   * second */
-let small: list(value) => value = numlst => 
-  switch (numlst) {
-    |[NumV(x), NumV(y)] => BoolV(x < y)
-    |_ => failwith ("invalid input")
+    |_ => failwith ("invalid input less than")
   }; 
 
   /* I/P: a list of two int values
@@ -90,7 +81,7 @@ let small: list(value) => value = numlst =>
 let greq: list(value) => value = numlst => 
   switch (numlst) {
     |[NumV(x), NumV(y)] => BoolV(x >= y)
-    |_ => failwith ("invalid input")
+    |_ => failwith ("invalid input greater than or equal to")
   }; 
 
   /* I/P: a list of two int values
@@ -110,9 +101,7 @@ let equality: list(value) => value = alst =>
     |[NumV(x), NumV(y)] => BoolV(x === y)
     |[BoolV(x), BoolV(y)] => BoolV(x === y)
     |[ListV(x), ListV(y)] => BoolV(x === y)
-    |[BuiltinV(x), BuiltinV(y)] => BoolV(x === y)
-    |[ClosureV(x), ClosureV(y)] => BoolV(x === y)
-    |[_, _] => BoolV(false)
+    |[_, _] => BoolV(false) 
     |_ => failwith ("invalid input")
   }; /* might need to evaluate when its a BuiltinV and ClosureV to check for the 
   equality of the values indicated by the data */
@@ -144,6 +133,8 @@ let iszero: value => value = va =>
     |NumV(_) => BoolV(false)
     |_ => failwith ("invalid input")
   }; 
+
+
 
 /* InitialTle as a list of bindings */
 let initialTle: environment = [
@@ -187,10 +178,49 @@ cons , first , rest , empty? ,
 cons? , not 
 */
 
-/* TODO: write the header comment parts required by the Design Recipe
- * and implement parseExpression */
+/* parseExpression: concreteProgramPiece => expression
+ input: cpe, a concreteProgramPiece
+ output: an expression that corresponds to cpe where all rules for expressions are followed
+*/
 let rec parseExpression: concreteProgramPiece => expression =
-  input => failwith("parseExpression is not yet implemented");
+  cpe =>
+    switch (cpe) {
+    | NumberC(x) => NumE(x)
+    | ListC(SymbolC("if"), ifEx, yes, no) =>
+      IfE(parseExpression(ifEx), parseExpression(yes), parseExpression(no))
+    | ListC(SymbolC("and"), pie1, pie2) =>
+      AndE(parseExpression(pie1), parseExpression(pie2))
+    | ListC(SymbolC("or"), pie1, pie2) =>
+      OrE(parseExpression(pie1), parseExpression(pie2))
+    | ListC(SymbolC("cond"),    ) => CondE([{,}]) // come back to this!!!
+    | ListC(SymbolC("lambda"), nameLst, body) => 
+      LambaE({nameList:/*HELPER DETAILED BELOW*/, lambdaBody: parseExpression(pie2)})
+    | ListC(SymbolC("let"), letPairLst, rest) => 
+      LetE({letPairs: /*HELPER DETAILED BELOW*/, parseExpression(rest)})
+    | ListC(x,..tl) => ApplicationE(parseExpression(x), parseExpression(tl)) /* <---- POTENTIAL HELPER DETAILED BELOW bc tl is a list not listC so parsing wont work*/
+    | SymbolC(x)
+      switch(x) {
+        | "true" => BoolE(true)
+        | "false" => Bool(false)
+        | "empty" => EmptyE
+        | x => NameE(Name(x))
+      } 
+    | _ => failwith("syntax error") //ask on edstem about failwith specifics
+  
+    };
+
+    //helper takes in list c of symbols that are just names to create a list of names spec for lambda data 
+      // lambda ListC(Symbolx symboly) (...)
+      //  | ListC(x,...tl) => [NameE(Name("x"),... parseExpression(ListC(tl))] IDEATION
+    //similar for letpairlist
+    //helper that maps procedure over the arguments of application e switch case because it could have 2,3,4,5 etc
+    // number of arguments especially if it is a userdefied closure and we dont know how many there will be so we 
+    //cant write an accurate switch case
+
+/* parseExpression: concreteProgramPiece => definition
+ input: cpd, a concreteProgramPiece
+ output: an definition that corresponds to cpd where all rules for definitions are followed
+*/
 
 /* TODO: write the header comment parts required by the Design Recipe
  * and implement parseDefinition */
@@ -214,15 +244,43 @@ let parse: concreteProgram => abstractProgram =
      * giving us a list of pieces, our abstract syntax */
     List.map(parsePiece, input);
 
+/* extendEnv: procedure to extend one env by another, here Tle by local
+I/P: two environments, one top and one local
+O/P: a new environment, with the tle extended by the local*/
+let extendEnv: (environment, environment) => environment =
+(tle, local) => List.append(tle, local); 
+
+/*
+Procedure to lookup a definition in the environment, check whether it is already
+bound to a value. Definition is name expression
+*/
+let rec deflookup: (environment, name) => option(value) =
+  (env, nom) =>
+    switch (env) {
+    | [(key, va), ...tl] =>
+      if (key == nom) {
+        Some(va);
+      } else {
+        lookup(tl, nom);
+      }
+    | _ => None
+    };
+
 /* TODO: write the header comment parts required by the Design Recipe
  * and implement eval */
 let rec eval: (tolLevelEnvt, localEnvt, expression) => value =
-  (tle, env, expr) =>
+  (tle, local, expr) => {
+      let allenv = extendEnv (tle, local); 
       switch (exp) {
       | NumE(x) => NumV(x)
       | BoolE(bool) => BoolV(bool)
       | EmptyE => []
-      | NameE(name) => /* return value bound to name */
+      | NameE(name) => 
+        if (deflookup (allenv, name) == Some(va)) {
+          va; 
+        } else {
+          failwith ("name not bounded to value, cannot eval")
+        }
       | AndE(expression, expression) => /* rule to how to evaluate and*/
       | OrE(expression, expression) => /* rule to how to evaluate or*/
       | IfE(ifData) => /* evaluate predicate, if true then evaluate first; if 
@@ -234,37 +292,24 @@ let rec eval: (tolLevelEnvt, localEnvt, expression) => value =
       }
       List.append(exprHelper(exp))
     /* NOTE: tle is top level environment and env is local environment */
-    failwith("eval is not yet implemented");
+    failwith("eval is not yet implemented")};
 
-/* TODO: write the header comment parts required by the Design Recipe */
+
+/* addDefiniton: adding a definition, or a name expression, to an environment
+  I/P: an environment and a definition in the format of name expression
+  O/P: a new environment with the addition of the definition  */
 let addDefinition: (environment, (name, expression)) => environment =
-(env, (nom, expr)) => [(nom, expr), ...env]; 
+  (env, (nom, expr)) =>
+    if (deflookup(env, nom) == Some(va)) {
+      failwith("name already bound to value");
+    } else {
+      [(nom, expr), ...env];
+    };
 
 /* TODO: write the header comment parts required by the Design Recipe
  * and implement stringOfValue*/
 let rec stringOfValue: value => string =
   aValue => failwith("stringOfValue is not yet implemented");
-
-
-/*
-Procedure to lookup a definition in the environment, check whether it is already
-bound to a value. Definition is name expression
-*/
-let rec deflookup: (environment, name) => option =
-  (env, nom) =>
-    switch (env) {
-    | [(key, va), ...tl] =>
-      if (key == nom) {
-<<<<<<< HEAD
-        Some(va);
-=======
-        failwith ("name already bound to value");
->>>>>>> 88ec93531fa60a30295d0462f6b0d8f4ce3e3ede
-      } else {
-        lookup(tl, nom);
-      }
-    | _ => None
-    };
 
 
 /*procedure to add new binding to environment*/

@@ -211,3 +211,9 @@ module Reader: ReaderSig = {
       readAllHelper(charListOfString(input));
     };
 };
+
+
+readAll("(cond
+    [(empty? lst) n]
+    [(cons? lst)
+     (my-fold-left proc (proc (first lst) n)(rest lst))]))")
