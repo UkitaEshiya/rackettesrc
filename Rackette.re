@@ -323,8 +323,9 @@ let parsePiece: concreteProgramPiece => abstractProgramPiece =
     | _ => failwith("expressions not yet parsed")
     };
 
-/* TODO: write the header comment parts required by the Design Recipe
- * for parse */
+/*  parse: procedure to convert a concreteProgram into an abstractProgram
+  I/P: a concreteProgram
+  O/P: the correcponding abstractProgram after parsing*/
 let parse: concreteProgram => abstractProgram =
   input =>
     /* this will parse all of the pieces of this program,
@@ -339,7 +340,9 @@ let extendEnv: (environment, environment) => environment =
 
 /*
 Procedure to lookup a definition in the environment, check whether it is already
-bound to a value. Definition is name expression
+bound to a value. Definition is name expression. 
+I/P: an environment and a name 
+O/P: the corresoding value to the name; None if name not bounded to a value
 */
 let rec deflookup: (environment, name) => option(value) =
   (env, nom) =>
@@ -396,10 +399,21 @@ let addDefinition: (environment, (name, expression)) => environment =
 /* TODO: write the header comment parts required by the Design Recipe
  * and implement stringOfValue*/
 let rec stringOfValue: value => string =
-  aValue => failwith("stringOfValue is not yet implemented");
+  aValue =>
+    switch (aValue) {
+    | NumV(x) => string_of_int(x)
+    | BoolV(boo) => string_of_bool(boo)
+    | ListV([hd, ...tl]) =>
+      "(cons " ++ stringOfValue(hd) ++ " " ++ stringOfValue(ListV(tl)) ++ ")"
+    | ListV([]) => "empty"
+    | BuiltinV(builtin) => builtin.printedRep
+    | ClosureV(closureData) => failwith ("implement later")
+    }
 
 
-/*procedure to add new binding to environment*/
+/*procedure to add new binding to environment
+  I/P: an environment and a binding 
+  O/P: the new environment with the binding added */
 let addBinding: (environment, binding) => environment =
 (env, bind) => [bind, ...env]; 
 
@@ -415,10 +429,10 @@ let process: abstractProgram => list(value) =
         up in environment; if already bind, return error saying name is already
         bind to value; if not bind, bind name to expression. */ 
         if {
-          switch(deflookup(tle, nom)){
+          (switch(deflookup(tle, nom)){
           | None => true
           | Some(result) => false
-        }; 
+        };) 
         } {
           addDefinition(nom, tle); 
         } else {
@@ -434,7 +448,9 @@ let process: abstractProgram => list(value) =
     processHelper(initialTle, pieces);
   };
 
-/* TODO: write the header comment parts required by the Design Recipe */
+/* I/P: a raw racket program in a string format 
+   O/P: a string indicating the corresponding of the racket program after
+   evaluation */
 let rackette: rawProgram => list(string) =
   program => List.map(stringOfValue, process(parse(readAll(program))));
   
