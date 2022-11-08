@@ -336,7 +336,7 @@ let parse: concreteProgram => abstractProgram =
 I/P: two environments, one top and one local
 O/P: a new environment, with the tle extended by the local*/
 let extendEnv: (environment, environment) => environment =
-(tle, local) => List.append(tle, local); 
+(local, tle) => List.append(local, tle); 
 
 /*
 Procedure to lookup a definition in the environment, check whether it is already
@@ -356,33 +356,65 @@ let rec deflookup: (environment, name) => option(value) =
     | _ => None
     };
 
+/* procedure to make letData into environment */
+let rec letPairHelper: list(letPair) => environment = lst => 
+  switch (lst) {
+    | [] => []
+    | [hd, ...tl] => [[hd.pairName, hd.pairExpr], ...letPairHelper(tl)]
+  } 
+
 /* TODO: write the header comment parts required by the Design Recipe
  * and implement eval */
-let rec eval: (tolLevelEnvt, localEnvt, expression) => value =
+let rec eval: (environment, environment, expression) => value =
   (tle, local, expr) => {
-      let allenv = extendEnv (tle, local); 
-      switch (exp) {
+      let allEnv = extendEnv (local, tle); 
+      switch (expr) {
       | NumE(x) => NumV(x)
-      | BoolE(bool) => BoolV(bool)
-      | EmptyE => []
-      | NameE(name) => 
-        if (deflookup (allenv, name) == Some(va)) {
+      | BoolE(boolExpr) => BoolV(boolExpr)
+      | EmptyE => ListV([])
+      | NameE(nom) => 
+        if (deflookup (allEnv, nom) == Some(va)) {
           va; 
         } else {
-          failwith ("name not bounded to value, cannot eval")
+          failwith ("name not bounded to value, cannot eval");
         }
-      | AndE(expression, expression) => /* rule to how to evaluate and*/
-      | OrE(expression, expression) => /* rule to how to evaluate or*/
-      | IfE(ifData) => /* evaluate predicate, if true then evaluate first; if 
-      false then evaluate no expression */ 
-      | CondE(list(condData)) 
-      | LambdaE(lambdaData)
-      | LetE(letData)
-      | ApplicationE(list(exp))=>
+      | AndE(expr1, expr2) => 
+        if ((eval(tle, local, expr1) == BoolV(true)) && 
+            (eval(tle, local, expr2) == BoolV(true))) {
+          BoolV(true);
+          } else {
+          BoolV(false);
+          }
+      | OrE(expr1, expr2) => 
+        if ((eval(tle, local, expr1) == BoolV(true)) || 
+            (eval(tle, local, expr2) == BoolV(true))) {
+          BoolV(true); 
+        } else {
+          BoolV(false); 
+        }; 
+      | IfE(ifData1) =>     /* evaluate predicate, if true then evaluate first;  
+      if false then evaluate second expression */
+      if (eval(tle, local, ifData1.boolExpr)) {
+        eval(tle, local, ifData1.trueExpr);
+      } else {
+        eval(tle, local, ifData1.falseExpr); 
+      } 
+      | CondE([hd, ...tl]) => 
+      if (eval(tle, local, hd.conditionExpr)) {
+        eval(tle, local, hd.resultExpr); 
+      }  else {
+        eval(tle, local, CondE(tl)); 
       }
-      List.append(exprHelper(exp))
+      | LambdaE(lambdaData1) 
+      | LetE(letData1) => 
+        eval(tle, extendEnv(letPairHelper(letData1), local), letData1.letBody)
+      | ApplicationE(list(exp))=> 
+      }
+  /*    List.append(exprHelper(exp)) */
     /* NOTE: tle is top level environment and env is local environment */
     failwith("eval is not yet implemented")};
+
+
 
 
 /* addDefiniton: adding a definition, or a name expression, to an environment
@@ -407,11 +439,11 @@ let rec stringOfValue: value => string =
       "(cons " ++ stringOfValue(hd) ++ " " ++ stringOfValue(ListV(tl)) ++ ")"
     | ListV([]) => "empty"
     | BuiltinV(builtin) => builtin.printedRep
-    | ClosureV(closureData) => failwith ("implement later")
-    }
+  /*  | ClosureV(closureData) => failwith ("implement later") */
+    };
 
 
-/*procedure to add new binding to environment
+/*procedure to add new binding to environment, not part of original file 
   I/P: an environment and a binding 
   O/P: the new environment with the binding added */
 let addBinding: (environment, binding) => environment =
