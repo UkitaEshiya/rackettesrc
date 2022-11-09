@@ -146,8 +146,8 @@ let contain: list(value) => value =
     | [hd, ListV([])] => ListV([hd])
     | [hd, ListV([hd2, ...tl])] => ListV([hd, hd2, ...tl])
     | [] => failwith("invalid input expect two arguments")
-    | [hd] => failwith("invalid input expect two arguments")
-    | [hd, _] => failwith("invalid input second item must be list")
+    | [_hd] => failwith("invalid input expect two arguments")
+    | [_hd, _] => failwith("invalid input second item must be list")
     | _ => failwith("invalid input expect two arguments")
     };
 
@@ -351,7 +351,7 @@ and parseExpression: concreteProgramPiece => expression =
           LetE({letPairs: letHelp(exp1), letBody: parseExpression(exp2)})
         | _ => failwith("misc invalid input")
         }
-      | [SymbolC(x), exp1, exp2] =>
+      | [SymbolC(x), _] =>
         switch (x) {
         | "and" => failwith("and: expected two arguments")
         | "or" => failwith("or: expected two arguments")
@@ -372,8 +372,8 @@ and parseExpression: concreteProgramPiece => expression =
       | "empty" => EmptyE
       | x => NameE(Name(x))
       }
-    | _ =>
-      failwith("entered concreteProgramPice is not syntactically correct")
+    /* | _ =>
+       failwith("entered concreteProgramPice is not syntactically correct")*/
     };
 
 /* parseDefinition: concreteProgramPiece => definition
@@ -499,9 +499,10 @@ let rec eval: (environment, environment, expression) => value =
         cExpr: lambdaData1.lambdaBody,
         cEnv: local,
       })
-    | LetE(letData1) =>
-      eval(tle, extendEnv(letPairHelper(letData1), local), letData1.letBody)
-    | ApplicationE(list) => []
+    | LetE(letData1) => failwith("not yet implemented let")
+    /* eval(tle, extendEnv(letPairHelper(letData1), local), letData1.letBody)*/
+    | ApplicationE(list) => failwith("not yet implemented application")
+    | _ => ListV([])
     };
   };
 /*    List.append(exprHelper(exp)) */
@@ -511,12 +512,13 @@ let rec eval: (environment, environment, expression) => value =
    I/P: an environment and a definition in the format of name expression
    O/P: a new environment with the addition of the definition  */
 let addDefinition: (environment, (name, expression)) => environment =
-  (env, (nom, expr)) =>
-    if (deflookup(env, nom) == Some(va)) {
-      failwith("name already bound to value");
-    } else {
-      [(nom, expr), ...env];
+  (env, (nom, expr)) => {
+    let newBinding = (nom, eval(env, env, expr));
+    switch (defLookUp(env, nom)) {
+    | Some(_) => failwith("name already bound to value")
+    | None => [newBinding, ...env]
     };
+  };
 
 /* stringOfValue: procedure to convert the value from evaluation into a string
    I/P: a value
@@ -534,7 +536,7 @@ let rec stringOfValue: value => string =
       ++ ")"
     | ListV([]) => "empty"
     | BuiltinV(builtin) => builtin.printedRep
-    /*  | ClosureV(closureData) => failwith ("implement later") */
+    | ClosureV(closureData) => failwith("implement later")
     };
 
 /*procedure to add new binding to environment, not part of original file
@@ -543,32 +545,37 @@ let rec stringOfValue: value => string =
 let addBinding: (environment, binding) => environment =
   (env, bind) => [bind, ...env];
 
-/* TODO: write the header comment parts required by the Design Recipe */
+let readName: definition => name =
+  def =>
+    switch (def) {
+    | (nom, _) => nom
+    };
+
+/* Process:
+   Input is an abstractProgram, which is a list of abstractProgram Pieces.
+   Each abstractProgramPiece is checked to be either definition or expression.
+   If definition, check whether name is already bind to value by looking
+   up in environment; if already bind, return error saying name is already
+   bind to value; if not bind, bind name to expression.
+   If expression, evaluate expression to value.*/
 let process: abstractProgram => list(value) =
   pieces => {
     let rec processHelper: (environment, abstractProgram) => list(value) =
       (tle, pieces) =>
         switch (pieces) {
         | [] => []
-        | [(nom, expr), ...tl] =>
-          /* if definition, check whether name is already bind to value by looking
-             up in environment; if already bind, return error saying name is already
-             bind to value; if not bind, bind name to expression. */
-          if ({
-                switch (deflookup(tle, nom)) {
-                | None => true
-                | Some(result) => false
-                };
-              }) {
-            addDefinition(nom, tle);
-          } else {
-            failwith("name already bind to value");
+        | [Definition(d), ...tl] =>
+          switch (defLookUp(tle, readName(d))) {
+          | None =>
+            let newEnv = addDefinition(tle, d);
+            processHelper(newEnv, tl);
+          | Some(_) => failwith("name already bind to value")
           }
-        /* recursive call for processhelper tl of list, then helper for add definition*/
-
-        | [expr, ...tl] =>
-          /* if expression, evaluate expression to value.*/
-          [eval(tle, env, e), ...processHelper(tle, tl)]
+        | [Expression(e), ...tl] => [
+            eval(tle, [], e), /*local env depend on what the expression is
+                                    need to make match cases prob*/
+            ...processHelper(tle, tl),
+          ]
         };
     processHelper(initialTle, pieces);
   };
@@ -591,4 +598,11 @@ checkExpectExpression(
   parseExpression(read("empty")),
   EmptyE,
   "read and parse empty expression",
+);
+
+// sample test: eval parseExpression with read
+checkExpect(
+  stringOfValue(eval(initialTle, [], parseExpression(read("empty")))),
+  "empty",
+  "read all the way for empty bruh",
 );
