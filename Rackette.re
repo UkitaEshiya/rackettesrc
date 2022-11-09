@@ -266,27 +266,18 @@ let initialTle: environment = [
 //lambdaHelp: ListC(list(concreteProgramPiece)) => list(NameE)
 //input: input, a ListC(list(concreteProgramPiece))
 //output: a list of NameE where each element corresponds to an element in input in the same order
-let rec lambdaHelp: concreteProgramPiece => list(expression) =
+let rec lambdaHelp: concreteProgramPiece => list(name) =
   listC =>
     switch (listC) {
-    | ListC([SymbolC(x)]) => [NameE(Name(x))]
-    | ListC([SymbolC(x), ...tl]) => [
-        NameE(Name(x)),
-        ...lambdaHelp(ListC(tl)),
-      ]
+    | ListC([SymbolC(x)]) => [Name(x)]
+    | ListC([SymbolC(x), ...tl]) => [Name(x), ...lambdaHelp(ListC(tl))]
     | _ => failwith("invalid input lambdaHelp")
     };
-/*
- let rec lambdaHelp: ListC(list(concreteProgramPiece)) => list(NameE) =
-   ListC([SymbolC(x),...tl]) =>
-     switch(x, list) {
-       |(x, []) => [NameE(Name(x))]
-       |(x, tl) => [NameE(Name(x)),... lambdaHelp(ListC(tl))
-     }; */
 
 //letHelp: ListC(list(concreteProgramPiece)) => list(letPairs)
 //input: ListC(input), ListC(list(concreteProgramPiece))
-//output: a list of let pairs where each list in input is translated into a letpair in order
+//output: a list of let pairs where each list in input is translated into a
+//letpair in ordef */
 let rec letHelp: concreteProgramPiece => list(letPair) =
   listC =>
     switch (listC) {
@@ -300,21 +291,40 @@ let rec letHelp: concreteProgramPiece => list(letPair) =
    ListC(input) =>
       switch(input) {
         |[[name, exp]] => [{NameE(Name(name))]
-        |[[name, exp],...tl] => [{NameE(Name(name)), parseExpression(exp)},...letHelp(ListC)]
+        |[[name, exp],...tl] => [{NameE(Name(name)), parseExpression(exp)},...
+        letHelp(ListC)]
       } */
 
-and condHelp: list(list(concreteProgramPiece)) => list(condData) =
+and condHelp: list(concreteProgramPiece) => list(condData) =
   /// does cond send in ListC of lists pr List C of List C or List pf List c?
   lst =>
     switch (lst) {
-    | [[name, exp]] => []
-    | _ => []
+    | [] => []
+    | [ListC([condExpr, resultExpr])] => [
+        {
+          conditionExpr: parseExpression(condExpr),
+          resultExpr: parseExpression(resultExpr),
+        },
+      ]
+    | [ListC([condExpr, resultExpr]), ...tl] => [
+        {
+          conditionExpr: parseExpression(condExpr),
+          resultExpr: parseExpression(resultExpr),
+        },
+        ...condHelp(tl),
+      ]
+    | _ =>
+      failwith(
+        "cond expect two arguments, but found incorrect number of
+      expressions following cond",
+      )
     }
+
 /* parseExpression: concreteProgramPiece => expression
     input: cpe, a concreteProgramPiece
-    output: an expression that corresponds to cpe where all rules for expressions are followed
+    output: an expression that corresponds to cpe where all rules for
+    expressions are followed
    */
-
 and parseExpression: concreteProgramPiece => expression =
   cpe =>
     switch (cpe) {
@@ -337,7 +347,9 @@ and parseExpression: concreteProgramPiece => expression =
             nameList: lambdaHelp(exp1),
             lambdaBody: parseExpression(exp2),
           })
-        | "let" => LetE({letPairs: letHelp(exp1), parseExpression: exp2})
+        | "let" =>
+          LetE({letPairs: letHelp(exp1), letBody: parseExpression(exp2)})
+        | _ => failwith("misc invalid input")
         }
       | [SymbolC(x), exp1, exp2] =>
         switch (x) {
@@ -345,11 +357,13 @@ and parseExpression: concreteProgramPiece => expression =
         | "or" => failwith("or: expected two arguments")
         | "lambda" => failwith("lambda: expected two arguments")
         | "let" => failwith("let: expected two arguments")
+        | _ => failwith("misc invalid input")
         }
-      /*| [SymbolC("cond"),...ListC(tl)] => CondE() //helper*/
-      | [SymbolC(x)] => NameE(name(x))
+      | [SymbolC("cond"), ...tl] => CondE(condHelp(tl))
+      | [SymbolC(x)] => NameE(Name(x))
       | [SymbolC(x), ...tl] =>
-        ApplicationE(NameE(name(x)), parseExpression(ListC(tl)))
+        ApplicationE([NameE(Name(x)), parseExpression(ListC(tl))])
+      | _ => failwith("misc invalid input")
       }
     | SymbolC(x) =>
       switch (x) {
@@ -364,12 +378,16 @@ and parseExpression: concreteProgramPiece => expression =
 
 /* parseDefinition: concreteProgramPiece => definition
     input: cpd, a concreteProgramPiece
-    output: an definition that corresponds to cpd where all rules for definitions are followed
+    output: an definition that corresponds to cpd where all rules for
+    definitions are followed
    */
 let parseDefinition: concreteProgramPiece => definition =
   cpd =>
     switch (cpd) {
-    | ListC("define", x, y) => (parseExpression(x), parseExpression(y))
+    | ListC([SymbolC("define"), SymbolC(x), y]) => (
+        Name(x),
+        parseExpression(y),
+      )
     | _ =>
       failwith(
         "define expects variable name followed by expression: incorrect format",
@@ -408,25 +426,28 @@ let extendEnv: (environment, environment) => environment =
  I/P: an environment and a name
  O/P: the corresoding value to the name; None if name not bounded to a value
  */
-let rec deflookup: (environment, name) => option(value) =
+let rec defLookUp: (environment, name) => option(value) =
   (env, nom) =>
     switch (env) {
     | [(key, va), ...tl] =>
       if (key == nom) {
         Some(va);
       } else {
-        lookup(tl, nom);
+        defLookUp(tl, nom);
       }
     | _ => None
     };
 
-/* procedure to make letData into environment */
-let rec letPairHelper: list(letPair) => environment =
-  lst =>
-    switch (lst) {
-    | [] => []
-    | [hd, ...tl] => [[hd.pairName, hd.pairExpr], ...letPairHelper(tl)]
-    };
+/* procedure to make letData into environment
+   let rec letPairHelper: list(letPair) => environment =
+     lst =>
+       switch (lst) {
+       | [] => []
+       | [hd, ...tl] => [
+           (hd.pairName, eval(hd.pairExpr)),
+           ...letPairHelper(tl),
+         ]
+       }; need to eval the expression in let pair to produce value*/
 
 /*eval: evaluate an expression with both the local and top level environment
   I/P: local environment, top level environment, an value
@@ -440,10 +461,9 @@ let rec eval: (environment, environment, expression) => value =
     | BoolE(boolExpr) => BoolV(boolExpr)
     | EmptyE => ListV([])
     | NameE(nom) =>
-      if (deflookup(allEnv, nom) == Some(va)) {
-        va;
-      } else {
-        failwith("name not bounded to value, cannot eval");
+      switch (defLookUp(allEnv, nom)) {
+      | Some(va) => va
+      | None => failwith("name not bounded to value, cannot eval")
       }
     | AndE(expr1, expr2) =>
       if (eval(tle, local, expr1) == BoolV(true)
@@ -462,18 +482,23 @@ let rec eval: (environment, environment, expression) => value =
     | IfE(ifData1) =>
       /* evaluate predicate, if true then evaluate first;
          if false then evaluate second expression */
-      if (eval(tle, local, ifData1.boolExpr)) {
+      if (eval(tle, local, ifData1.boolExpr) == BoolV(true)) {
         eval(tle, local, ifData1.trueExpr);
       } else {
         eval(tle, local, ifData1.falseExpr);
       }
     | CondE([hd, ...tl]) =>
-      if (eval(tle, local, hd.conditionExpr)) {
+      if (eval(tle, local, hd.conditionExpr) == BoolV(true)) {
         eval(tle, local, hd.resultExpr);
       } else {
         eval(tle, local, CondE(tl));
       }
-    | LambdaE(lambdaData1)
+    | LambdaE(lambdaData1) =>
+      ClosureV({
+        cNameList: lambdaData1.nameList,
+        cExpr: lambdaData1.lambdaBody,
+        cEnv: local,
+      })
     | LetE(letData1) =>
       eval(tle, extendEnv(letPairHelper(letData1), local), letData1.letBody)
     | ApplicationE(list) => []
@@ -493,8 +518,9 @@ let addDefinition: (environment, (name, expression)) => environment =
       [(nom, expr), ...env];
     };
 
-/* TODO: write the header comment parts required by the Design Recipe
- * and implement stringOfValue*/
+/* stringOfValue: procedure to convert the value from evaluation into a string
+   I/P: a value
+   O/P: the corresponding string representing the value*/
 let rec stringOfValue: value => string =
   aValue =>
     switch (aValue) {

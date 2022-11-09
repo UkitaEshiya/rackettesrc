@@ -212,9 +212,11 @@ module Reader: ReaderSig = {
     };
 };
 
-readAll(
-  "(cond
-    [(empty? lst) n]
-    [(cons? lst)
-     (my-fold-left proc (proc (first lst) n)(rest lst))]))",
-);
+/*
+ readAll(
+   "(cond
+     [(empty? lst) n]
+     [(cons? lst)
+      (my-fold-left proc (proc (first lst) n)(rest lst))]))",
+ );
+ */
