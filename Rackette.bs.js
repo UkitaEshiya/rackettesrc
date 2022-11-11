@@ -2,6 +2,7 @@
 'use strict';
 
 var List = require("bs-platform/lib/js/list.js");
+var Curry = require("bs-platform/lib/js/curry.js");
 var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
 var Caml_int32 = require("bs-platform/lib/js/caml_int32.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
@@ -422,13 +423,13 @@ function firstLst(lst) {
   }
   var match = lst.hd;
   if (match.TAG !== /* ListV */2) {
-    return Pervasives.failwith("invalid input input must be a list");
+    return Pervasives.failwith("invalid input first must be a list");
   }
   var match$1 = match._0;
   if (match$1 && !lst.tl) {
     return match$1.hd;
   } else {
-    return Pervasives.failwith("invalid input input must be a list");
+    return Pervasives.failwith("invalid input first must be a list");
   }
 }
 
@@ -438,7 +439,7 @@ function restLst(lst) {
   }
   var match = lst.hd;
   if (match.TAG !== /* ListV */2) {
-    return Pervasives.failwith("invalid input input must be a list");
+    return Pervasives.failwith("invalid input rest must be a list");
   }
   var match$1 = match._0;
   if (match$1 && !lst.tl) {
@@ -447,19 +448,19 @@ function restLst(lst) {
             _0: match$1.tl
           };
   } else {
-    return Pervasives.failwith("invalid input input must be a list");
+    return Pervasives.failwith("invalid input rest must be a list");
   }
 }
 
 function isEmpty(lst) {
   if (!lst) {
-    return Pervasives.failwith("invalid input input must be a list");
+    return Pervasives.failwith("invalid input empty? must be a list");
   }
   var match = lst.hd;
   if (match.TAG === /* ListV */2) {
     if (match._0) {
       if (lst.tl) {
-        return Pervasives.failwith("invalid input input must be a list");
+        return Pervasives.failwith("invalid input empty? must be a list");
       } else {
         return {
                 TAG: /* BoolV */1,
@@ -467,7 +468,7 @@ function isEmpty(lst) {
               };
       }
     } else if (lst.tl) {
-      return Pervasives.failwith("invalid input input must be a list");
+      return Pervasives.failwith("invalid input empty? must be a list");
     } else {
       return {
               TAG: /* BoolV */1,
@@ -475,19 +476,19 @@ function isEmpty(lst) {
             };
     }
   } else {
-    return Pervasives.failwith("invalid input input must be a list");
+    return Pervasives.failwith("invalid input empty? must be a list");
   }
 }
 
 function isCons(lst) {
   if (!lst) {
-    return Pervasives.failwith("invalid input input must be a list");
+    return Pervasives.failwith("invalid input cons? must be a list");
   }
   var match = lst.hd;
   if (match.TAG === /* ListV */2) {
     if (match._0) {
       if (lst.tl) {
-        return Pervasives.failwith("invalid input input must be a list");
+        return Pervasives.failwith("invalid input cons? must be a list");
       } else {
         return {
                 TAG: /* BoolV */1,
@@ -495,7 +496,7 @@ function isCons(lst) {
               };
       }
     } else if (lst.tl) {
-      return Pervasives.failwith("invalid input input must be a list");
+      return Pervasives.failwith("invalid input cons? must be a list");
     } else {
       return {
               TAG: /* BoolV */1,
@@ -503,19 +504,19 @@ function isCons(lst) {
             };
     }
   } else {
-    return Pervasives.failwith("invalid input input must be a list");
+    return Pervasives.failwith("invalid input cons? must be a list");
   }
 }
 
 function isNot(lst) {
   if (!lst) {
-    return Pervasives.failwith("invalid input input must be a boolean");
+    return Pervasives.failwith("invalid input not must be a boolean");
   }
   var match = lst.hd;
   if (match.TAG === /* BoolV */1) {
     if (match._0) {
       if (lst.tl) {
-        return Pervasives.failwith("invalid input input must be a boolean");
+        return Pervasives.failwith("invalid input not must be a boolean");
       } else {
         return {
                 TAG: /* BoolV */1,
@@ -523,7 +524,7 @@ function isNot(lst) {
               };
       }
     } else if (lst.tl) {
-      return Pervasives.failwith("invalid input input must be a boolean");
+      return Pervasives.failwith("invalid input not must be a boolean");
     } else {
       return {
               TAG: /* BoolV */1,
@@ -531,7 +532,7 @@ function isNot(lst) {
             };
     }
   } else {
-    return Pervasives.failwith("invalid input input must be a boolean");
+    return Pervasives.failwith("invalid input not must be a boolean");
   }
 }
 
@@ -648,7 +649,7 @@ var initialTle_1 = {
                     TAG: /* BuiltinV */3,
                     _0: {
                       printedRep: "<builtin-proc-<=>",
-                      bProc: greq
+                      bProc: smeq
                     }
                   }
                 ],
@@ -661,7 +662,7 @@ var initialTle_1 = {
                       TAG: /* BuiltinV */3,
                       _0: {
                         printedRep: "<builtin-proc->=>",
-                        bProc: smeq
+                        bProc: greq
                       }
                     }
                   ],
@@ -849,37 +850,94 @@ function lambdaHelp(listC) {
   }
 }
 
-function letHelp(listC) {
-  switch (listC.TAG | 0) {
+function letHelp(input) {
+  switch (input.TAG | 0) {
     case /* NumberC */0 :
     case /* SymbolC */1 :
-        return /* [] */0;
+        return Pervasives.failwith("letHelp must take in a list of concrete program pieces");
     case /* ListC */2 :
-        return /* [] */0;
+        var x = input._0;
+        if (!x) {
+          return Pervasives.failwith("invalid input letHelp needs ListC(SymbolC(string)...)");
+        }
+        var match = x.hd;
+        switch (match.TAG | 0) {
+          case /* NumberC */0 :
+          case /* SymbolC */1 :
+              return Pervasives.failwith("invalid input letHelp needs ListC(SymbolC(string)...)");
+          case /* ListC */2 :
+              var match$1 = match._0;
+              if (!match$1) {
+                return Pervasives.failwith("invalid input letHelp needs ListC(SymbolC(string)...)");
+              }
+              var nom = match$1.hd;
+              switch (nom.TAG | 0) {
+                case /* SymbolC */1 :
+                    var match$2 = match$1.tl;
+                    if (!match$2) {
+                      return Pervasives.failwith("invalid input letHelp needs ListC(SymbolC(string)...)");
+                    }
+                    if (match$2.tl) {
+                      return Pervasives.failwith("invalid input letHelp needs ListC(SymbolC(string)...)");
+                    }
+                    var tl = x.tl;
+                    var expr = match$2.hd;
+                    var nom$1 = nom._0;
+                    if (tl) {
+                      return {
+                              hd: {
+                                pairName: /* Name */{
+                                  _0: nom$1
+                                },
+                                pairExpr: parseExpression(expr)
+                              },
+                              tl: letHelp({
+                                    TAG: /* ListC */2,
+                                    _0: tl
+                                  })
+                            };
+                    } else {
+                      return {
+                              hd: {
+                                pairName: /* Name */{
+                                  _0: nom$1
+                                },
+                                pairExpr: parseExpression(expr)
+                              },
+                              tl: /* [] */0
+                            };
+                    }
+                case /* NumberC */0 :
+                case /* ListC */2 :
+                    return Pervasives.failwith("invalid input letHelp needs ListC(SymbolC(string)...)");
+                
+              }
+          
+        }
     
   }
 }
 
 function condHelp(lst) {
   if (!lst) {
-    return /* [] */0;
+    return Pervasives.failwith("cond needs a list of bool, expr pairs");
   }
   var match = lst.hd;
   switch (match.TAG | 0) {
     case /* NumberC */0 :
     case /* SymbolC */1 :
-        return Pervasives.failwith("cond expect two arguments, but found incorrect number of\n      expressions following cond");
+        return Pervasives.failwith("condHelp expects [ListC([...]...)]");
     case /* ListC */2 :
         var match$1 = match._0;
         if (!match$1) {
-          return Pervasives.failwith("cond expect two arguments, but found incorrect number of\n      expressions following cond");
+          return Pervasives.failwith("condHelp expects [ListC([...]...)]");
         }
         var match$2 = match$1.tl;
         if (!match$2) {
-          return Pervasives.failwith("cond expect two arguments, but found incorrect number of\n      expressions following cond");
+          return Pervasives.failwith("condHelp expects [ListC([...]...)]");
         }
         if (match$2.tl) {
-          return Pervasives.failwith("cond expect two arguments, but found incorrect number of\n      expressions following cond");
+          return Pervasives.failwith("condHelp expects [ListC([...]...)]");
         }
         var tl = lst.tl;
         var resultExpr = match$2.hd;
@@ -905,81 +963,94 @@ function condHelp(lst) {
   }
 }
 
-function parseExpression(cpe) {
-  switch (cpe.TAG | 0) {
-    case /* NumberC */0 :
-        return {
-                TAG: /* NumE */0,
-                _0: cpe._0
-              };
-    case /* SymbolC */1 :
-        var x = cpe._0;
-        switch (x) {
-          case "empty" :
-              return /* EmptyE */0;
-          case "false" :
+function parseExpression(_cpe) {
+  while(true) {
+    var cpe = _cpe;
+    switch (cpe.TAG | 0) {
+      case /* NumberC */0 :
+          return {
+                  TAG: /* NumE */0,
+                  _0: cpe._0
+                };
+      case /* SymbolC */1 :
+          var x = cpe._0;
+          switch (x) {
+            case "empty" :
+                return /* EmptyE */0;
+            case "false" :
+                return {
+                        TAG: /* BoolE */1,
+                        _0: false
+                      };
+            case "true" :
+                return {
+                        TAG: /* BoolE */1,
+                        _0: true
+                      };
+            default:
               return {
-                      TAG: /* BoolE */1,
-                      _0: false
+                      TAG: /* NameE */2,
+                      _0: /* Name */{
+                        _0: x
+                      }
                     };
-          case "true" :
-              return {
-                      TAG: /* BoolE */1,
-                      _0: true
-                    };
-          default:
-            return {
-                    TAG: /* NameE */2,
-                    _0: /* Name */{
-                      _0: x
-                    }
-                  };
-        }
-    case /* ListC */2 :
-        var lst = cpe._0;
-        if (!lst) {
-          return Pervasives.failwith("misc invalid input");
-        }
-        var x$1 = lst.hd;
-        switch (x$1.TAG | 0) {
-          case /* SymbolC */1 :
-              var x$2 = x$1._0;
-              if (x$2 === "if") {
-                var match = lst.tl;
-                if (!match) {
-                  return Pervasives.failwith("expected three arguments");
+          }
+      case /* ListC */2 :
+          var lst = cpe._0;
+          if (!lst) {
+            return Pervasives.failwith("rackette cannot handle an empty list");
+          }
+          var x$1 = lst.hd;
+          switch (x$1.TAG | 0) {
+            case /* SymbolC */1 :
+                var x$2 = x$1._0;
+                var exit = 0;
+                if (x$2 === "if") {
+                  var match = lst.tl;
+                  if (!match) {
+                    return Pervasives.failwith("expected three arguments");
+                  }
+                  var match$1 = match.tl;
+                  if (!match$1) {
+                    return Pervasives.failwith("expected three arguments");
+                  }
+                  var match$2 = match$1.tl;
+                  if (match$2 && !match$2.tl) {
+                    return {
+                            TAG: /* IfE */5,
+                            _0: {
+                              boolExpr: parseExpression(match.hd),
+                              trueExpr: parseExpression(match$1.hd),
+                              falseExpr: parseExpression(match$2.hd)
+                            }
+                          };
+                  } else {
+                    return Pervasives.failwith("expected three arguments");
+                  }
                 }
-                var match$1 = match.tl;
-                if (!match$1) {
-                  return Pervasives.failwith("expected three arguments");
-                }
-                var match$2 = match$1.tl;
-                if (match$2 && !match$2.tl) {
-                  return {
-                          TAG: /* IfE */5,
-                          _0: {
-                            boolExpr: parseExpression(match.hd),
-                            trueExpr: parseExpression(match$1.hd),
-                            falseExpr: parseExpression(match$2.hd)
-                          }
-                        };
-                } else {
-                  return Pervasives.failwith("expected three arguments");
-                }
-              }
-              var match$3 = lst.tl;
-              if (match$3) {
-                var match$4 = match$3.tl;
-                var exp1 = match$3.hd;
-                if (match$4) {
-                  if (!match$4.tl) {
+                var match$3 = lst.tl;
+                if (match$3) {
+                  var match$4 = match$3.tl;
+                  if (match$4 && !match$4.tl) {
                     var exp2 = match$4.hd;
+                    var exp1 = match$3.hd;
                     switch (x$2) {
                       case "and" :
                           return {
                                   TAG: /* AndE */3,
                                   _0: parseExpression(exp1),
                                   _1: parseExpression(exp2)
+                                };
+                      case "cond" :
+                          return {
+                                  TAG: /* CondE */6,
+                                  _0: condHelp({
+                                        hd: exp1,
+                                        tl: {
+                                          hd: exp2,
+                                          tl: /* [] */0
+                                        }
+                                      })
                                 };
                       case "lambda" :
                           return {
@@ -1004,14 +1075,40 @@ function parseExpression(cpe) {
                                   _1: parseExpression(exp2)
                                 };
                       default:
-                        return Pervasives.failwith("misc invalid input");
+                        return {
+                                TAG: /* ApplicationE */9,
+                                _0: {
+                                  hd: {
+                                    TAG: /* NameE */2,
+                                    _0: /* Name */{
+                                      _0: x$2
+                                    }
+                                  },
+                                  tl: {
+                                    hd: parseExpression(exp1),
+                                    tl: {
+                                      hd: parseExpression(exp2),
+                                      tl: /* [] */0
+                                    }
+                                  }
+                                }
+                              };
                     }
+                  } else {
+                    exit = 2;
                   }
-                  
                 } else {
+                  exit = 2;
+                }
+                if (exit === 2) {
                   switch (x$2) {
                     case "and" :
                         return Pervasives.failwith("and: expected two arguments");
+                    case "cond" :
+                        return {
+                                TAG: /* CondE */6,
+                                _0: condHelp(lst.tl)
+                              };
                     case "lambda" :
                         return Pervasives.failwith("lambda: expected two arguments");
                     case "let" :
@@ -1019,53 +1116,45 @@ function parseExpression(cpe) {
                     case "or" :
                         return Pervasives.failwith("or: expected two arguments");
                     default:
-                      return Pervasives.failwith("misc invalid input");
+                      if (!lst.tl) {
+                        return {
+                                TAG: /* NameE */2,
+                                _0: /* Name */{
+                                  _0: x$2
+                                }
+                              };
+                      }
+                      
                   }
                 }
-              }
-              if (x$2 === "cond") {
-                return {
-                        TAG: /* CondE */6,
-                        _0: condHelp(lst.tl)
-                      };
-              }
-              var tl = lst.tl;
-              if (tl) {
-                return {
-                        TAG: /* ApplicationE */9,
-                        _0: {
-                          hd: {
-                            TAG: /* NameE */2,
-                            _0: /* Name */{
-                              _0: x$2
-                            }
-                          },
-                          tl: {
-                            hd: parseExpression({
-                                  TAG: /* ListC */2,
-                                  _0: tl
-                                }),
-                            tl: /* [] */0
-                          }
-                        }
-                      };
-              } else {
-                return {
-                        TAG: /* NameE */2,
-                        _0: /* Name */{
-                          _0: x$2
-                        }
-                      };
-              }
-              break;
-          case /* NumberC */0 :
-          case /* ListC */2 :
-              return Pervasives.failwith("misc invalid input");
-          
-        }
-        break;
-    
-  }
+                break;
+            case /* NumberC */0 :
+            case /* ListC */2 :
+                break;
+            
+          }
+          var tl = lst.tl;
+          if (tl) {
+            return {
+                    TAG: /* ApplicationE */9,
+                    _0: {
+                      hd: parseExpression(x$1),
+                      tl: {
+                        hd: parseExpression({
+                              TAG: /* ListC */2,
+                              _0: tl
+                            }),
+                        tl: /* [] */0
+                      }
+                    }
+                  };
+          }
+          _cpe = x$1;
+          continue ;
+          break;
+      
+    }
+  };
 }
 
 function parseDefinition(cpd) {
@@ -1179,9 +1268,24 @@ function defLookUp(_env, nom) {
   };
 }
 
-function $$eval(tle, local, _expr) {
+function letPairHelper(tle, local, lst) {
+  if (!lst) {
+    return /* [] */0;
+  }
+  var hd = lst.hd;
+  return {
+          hd: [
+            hd.pairName,
+            $$eval(tle, local, hd.pairExpr)
+          ],
+          tl: letPairHelper(tle, local, lst.tl)
+        };
+}
+
+function $$eval(tle, _local, _expr) {
   while(true) {
     var expr = _expr;
+    var local = _local;
     var allEnv = List.append(local, tle);
     if (typeof expr === "number") {
       return {
@@ -1208,71 +1312,88 @@ function $$eval(tle, local, _expr) {
             return Pervasives.failwith("name not bounded to value, cannot eval");
           }
       case /* AndE */3 :
-          if (Caml_obj.caml_equal($$eval(tle, local, expr._0), {
-                  TAG: /* BoolV */1,
-                  _0: true
-                }) && Caml_obj.caml_equal($$eval(tle, local, expr._1), {
-                  TAG: /* BoolV */1,
-                  _0: true
-                })) {
-            return {
-                    TAG: /* BoolV */1,
-                    _0: true
-                  };
-          } else {
+          var match = $$eval(tle, local, expr._0);
+          if (match.TAG !== /* BoolV */1) {
+            return Pervasives.failwith("and expects two bool expr");
+          }
+          if (!match._0) {
             return {
                     TAG: /* BoolV */1,
                     _0: false
                   };
           }
+          var match$1 = $$eval(tle, local, expr._1);
+          if (match$1.TAG === /* BoolV */1) {
+            if (match$1._0) {
+              return {
+                      TAG: /* BoolV */1,
+                      _0: true
+                    };
+            } else {
+              return {
+                      TAG: /* BoolV */1,
+                      _0: false
+                    };
+            }
+          } else {
+            return Pervasives.failwith("and expects two bool expr");
+          }
       case /* OrE */4 :
-          if (Caml_obj.caml_equal($$eval(tle, local, expr._0), {
-                  TAG: /* BoolV */1,
-                  _0: true
-                }) || Caml_obj.caml_equal($$eval(tle, local, expr._1), {
-                  TAG: /* BoolV */1,
-                  _0: true
-                })) {
+          var match$2 = $$eval(tle, local, expr._0);
+          if (match$2.TAG !== /* BoolV */1) {
+            return Pervasives.failwith("or expects two bool expr");
+          }
+          if (match$2._0) {
             return {
                     TAG: /* BoolV */1,
                     _0: true
                   };
+          }
+          var match$3 = $$eval(tle, local, expr._1);
+          if (match$3.TAG === /* BoolV */1) {
+            if (match$3._0) {
+              return {
+                      TAG: /* BoolV */1,
+                      _0: true
+                    };
+            } else {
+              return {
+                      TAG: /* BoolV */1,
+                      _0: false
+                    };
+            }
           } else {
-            return {
-                    TAG: /* BoolV */1,
-                    _0: false
-                  };
+            return Pervasives.failwith("or expects two bool expr");
           }
       case /* IfE */5 :
           var ifData1 = expr._0;
-          if (Caml_obj.caml_equal($$eval(tle, local, ifData1.boolExpr), {
-                  TAG: /* BoolV */1,
-                  _0: true
-                })) {
+          var match$4 = $$eval(tle, local, ifData1.boolExpr);
+          if (match$4.TAG !== /* BoolV */1) {
+            return Pervasives.failwith("if-expr must eval to bool");
+          }
+          if (match$4._0) {
             _expr = ifData1.trueExpr;
             continue ;
           }
           _expr = ifData1.falseExpr;
           continue ;
       case /* CondE */6 :
-          var match = expr._0;
-          if (!match) {
-            return {
-                    TAG: /* ListV */2,
-                    _0: /* [] */0
-                  };
+          var match$5 = expr._0;
+          if (!match$5) {
+            return Pervasives.failwith("cond expr or app expr cannot contain empty list");
           }
-          var hd = match.hd;
-          if (Caml_obj.caml_equal($$eval(tle, local, hd.conditionExpr), {
-                  TAG: /* BoolV */1,
-                  _0: true
-                })) {
+          var hd = match$5.hd;
+          var match$6 = $$eval(tle, local, hd.conditionExpr);
+          if (match$6.TAG !== /* BoolV */1) {
+            return Pervasives.failwith("condition expr of cond must eval to bool");
+          }
+          if (match$6._0) {
             _expr = hd.resultExpr;
             continue ;
           }
           _expr = {
             TAG: /* CondE */6,
-            _0: match.tl
+            _0: match$5.tl
           };
           continue ;
       case /* LambdaE */7 :
@@ -1286,9 +1407,23 @@ function $$eval(tle, local, _expr) {
                   }
                 };
       case /* LetE */8 :
-          return Pervasives.failwith("not yet implemented let");
+          var letData1 = expr._0;
+          _expr = letData1.letBody;
+          _local = List.append(letPairHelper(tle, local, letData1.letPairs), local);
+          continue ;
       case /* ApplicationE */9 :
-          return Pervasives.failwith("not yet implemented application");
+          var match$7 = expr._0;
+          if (!match$7) {
+            return Pervasives.failwith("cond expr or app expr cannot contain empty list");
+          }
+          var hd$1 = $$eval(tle, local, match$7.hd);
+          if (hd$1.TAG === /* BuiltinV */3) {
+            return Curry._1(hd$1._0.bProc, List.map((function (param) {
+                              return $$eval(tle, /* [] */0, param);
+                            }), match$7.tl));
+          } else {
+            return Pervasives.failwith("syntax error for builtin proc or closure");
+          }
       
     }
   };
@@ -1331,20 +1466,9 @@ function stringOfValue(aValue) {
     case /* BuiltinV */3 :
         return aValue._0.printedRep;
     case /* ClosureV */4 :
-        return Pervasives.failwith("implement later");
+        return "user-defined procedure";
     
   }
-}
-
-function addBinding(env, bind) {
-  return {
-          hd: bind,
-          tl: env
-        };
-}
-
-function readName(def) {
-  return def[0];
 }
 
 function $$process(pieces) {
@@ -1362,14 +1486,8 @@ function $$process(pieces) {
                 tl: processHelper(tle, pieces.tl)
               };
       }
-      var d$1 = d._0;
-      var match = defLookUp(tle, readName(d$1));
-      if (match !== undefined) {
-        return Pervasives.failwith("name already bind to value");
-      }
-      var newEnv = addDefinition(tle, d$1);
       _pieces = pieces.tl;
-      _tle = newEnv;
+      _tle = addDefinition(tle, d._0);
       continue ;
     };
   };
@@ -1387,7 +1505,550 @@ CS17SetupRackette$Rackette.checkExpectExpression(parseExpression({
 
 CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("empty")), /* EmptyE */0, "read and parse empty expression");
 
-CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("empty")))), "empty", "read all the way for empty bruh");
+CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("empty")))), "empty", "read all the way for empty");
+
+CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("1")))), "1", "read all the way for a num");
+
+CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("(+ 1 5)")), {
+      TAG: /* ApplicationE */9,
+      _0: {
+        hd: {
+          TAG: /* NameE */2,
+          _0: /* Name */{
+            _0: "+"
+          }
+        },
+        tl: {
+          hd: {
+            TAG: /* NumE */0,
+            _0: 1
+          },
+          tl: {
+            hd: {
+              TAG: /* NumE */0,
+              _0: 5
+            },
+            tl: /* [] */0
+          }
+        }
+      }
+    }, "read and parse 1 + 5");
+
+CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(+ 1 5)")))), "6", "stringOfValue buildin proc +");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(+ 1 5)"), {
+      hd: "6",
+      tl: /* [] */0
+    }, "rackette of buildin proc");
+
+CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("(let ((x 5)) x)")), {
+      TAG: /* LetE */8,
+      _0: {
+        letPairs: {
+          hd: {
+            pairName: /* Name */{
+              _0: "x"
+            },
+            pairExpr: {
+              TAG: /* NumE */0,
+              _0: 5
+            }
+          },
+          tl: /* [] */0
+        },
+        letBody: {
+          TAG: /* NameE */2,
+          _0: /* Name */{
+            _0: "x"
+          }
+        }
+      }
+    }, "read and parse for let expression");
+
+CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("(let ((x 5)(y 3))(+ x y))")), {
+      TAG: /* LetE */8,
+      _0: {
+        letPairs: {
+          hd: {
+            pairName: /* Name */{
+              _0: "x"
+            },
+            pairExpr: {
+              TAG: /* NumE */0,
+              _0: 5
+            }
+          },
+          tl: {
+            hd: {
+              pairName: /* Name */{
+                _0: "y"
+              },
+              pairExpr: {
+                TAG: /* NumE */0,
+                _0: 3
+              }
+            },
+            tl: /* [] */0
+          }
+        },
+        letBody: {
+          TAG: /* ApplicationE */9,
+          _0: {
+            hd: {
+              TAG: /* NameE */2,
+              _0: /* Name */{
+                _0: "+"
+              }
+            },
+            tl: {
+              hd: {
+                TAG: /* NameE */2,
+                _0: /* Name */{
+                  _0: "x"
+                }
+              },
+              tl: {
+                hd: {
+                  TAG: /* NameE */2,
+                  _0: /* Name */{
+                    _0: "y"
+                  }
+                },
+                tl: /* [] */0
+              }
+            }
+          }
+        }
+      }
+    }, "read and parse for let expression");
+
+CS17SetupRackette$Rackette.checkExpectAbstractProgram(List.map(parsePiece, {
+          hd: Read$Rackette.Reader.read("(lambda (x) x)"),
+          tl: /* [] */0
+        }), {
+      hd: {
+        TAG: /* Expression */1,
+        _0: {
+          TAG: /* LambdaE */7,
+          _0: {
+            nameList: {
+              hd: /* Name */{
+                _0: "x"
+              },
+              tl: /* [] */0
+            },
+            lambdaBody: {
+              TAG: /* NameE */2,
+              _0: /* Name */{
+                _0: "x"
+              }
+            }
+          }
+        }
+      },
+      tl: /* [] */0
+    }, "read and parse for lambda expressions with one name");
+
+CS17SetupRackette$Rackette.checkExpectAbstractProgram(List.map(parsePiece, {
+          hd: Read$Rackette.Reader.read("(lambda (x y) (+ x y))"),
+          tl: /* [] */0
+        }), {
+      hd: {
+        TAG: /* Expression */1,
+        _0: {
+          TAG: /* LambdaE */7,
+          _0: {
+            nameList: {
+              hd: /* Name */{
+                _0: "x"
+              },
+              tl: {
+                hd: /* Name */{
+                  _0: "y"
+                },
+                tl: /* [] */0
+              }
+            },
+            lambdaBody: {
+              TAG: /* ApplicationE */9,
+              _0: {
+                hd: {
+                  TAG: /* NameE */2,
+                  _0: /* Name */{
+                    _0: "+"
+                  }
+                },
+                tl: {
+                  hd: {
+                    TAG: /* NameE */2,
+                    _0: /* Name */{
+                      _0: "x"
+                    }
+                  },
+                  tl: {
+                    hd: {
+                      TAG: /* NameE */2,
+                      _0: /* Name */{
+                        _0: "y"
+                      }
+                    },
+                    tl: /* [] */0
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      tl: /* [] */0
+    }, "read and parse for lambda expressions with two names");
+
+CS17SetupRackette$Rackette.checkExpectAbstractProgram(List.map(parsePiece, {
+          hd: Read$Rackette.Reader.read("(if (positive? -5) (3) 2)"),
+          tl: /* [] */0
+        }), {
+      hd: {
+        TAG: /* Expression */1,
+        _0: {
+          TAG: /* IfE */5,
+          _0: {
+            boolExpr: {
+              TAG: /* ApplicationE */9,
+              _0: {
+                hd: {
+                  TAG: /* NameE */2,
+                  _0: /* Name */{
+                    _0: "positive?"
+                  }
+                },
+                tl: {
+                  hd: {
+                    TAG: /* NumE */0,
+                    _0: -5
+                  },
+                  tl: /* [] */0
+                }
+              }
+            },
+            trueExpr: {
+              TAG: /* NumE */0,
+              _0: 3
+            },
+            falseExpr: {
+              TAG: /* NumE */0,
+              _0: 2
+            }
+          }
+        }
+      },
+      tl: /* [] */0
+    }, "read and parse for if statement");
+
+CS17SetupRackette$Rackette.checkExpectAbstractProgram(List.map(parsePiece, {
+          hd: Read$Rackette.Reader.read("(and true 5)"),
+          tl: /* [] */0
+        }), {
+      hd: {
+        TAG: /* Expression */1,
+        _0: {
+          TAG: /* AndE */3,
+          _0: {
+            TAG: /* BoolE */1,
+            _0: true
+          },
+          _1: {
+            TAG: /* NumE */0,
+            _0: 5
+          }
+        }
+      },
+      tl: /* [] */0
+    }, "read and parse for and statement");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(and true false)"), {
+      hd: "false",
+      tl: /* [] */0
+    }, "read and parse for and statement");
+
+CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("(cond\n   ((positive? -5) 1)\n   ((zero? -5) 2)\n   ((positive? 5) 3))")), {
+      TAG: /* CondE */6,
+      _0: {
+        hd: {
+          conditionExpr: {
+            TAG: /* ApplicationE */9,
+            _0: {
+              hd: {
+                TAG: /* NameE */2,
+                _0: /* Name */{
+                  _0: "positive?"
+                }
+              },
+              tl: {
+                hd: {
+                  TAG: /* NumE */0,
+                  _0: -5
+                },
+                tl: /* [] */0
+              }
+            }
+          },
+          resultExpr: {
+            TAG: /* NumE */0,
+            _0: 1
+          }
+        },
+        tl: {
+          hd: {
+            conditionExpr: {
+              TAG: /* ApplicationE */9,
+              _0: {
+                hd: {
+                  TAG: /* NameE */2,
+                  _0: /* Name */{
+                    _0: "zero?"
+                  }
+                },
+                tl: {
+                  hd: {
+                    TAG: /* NumE */0,
+                    _0: -5
+                  },
+                  tl: /* [] */0
+                }
+              }
+            },
+            resultExpr: {
+              TAG: /* NumE */0,
+              _0: 2
+            }
+          },
+          tl: {
+            hd: {
+              conditionExpr: {
+                TAG: /* ApplicationE */9,
+                _0: {
+                  hd: {
+                    TAG: /* NameE */2,
+                    _0: /* Name */{
+                      _0: "positive?"
+                    }
+                  },
+                  tl: {
+                    hd: {
+                      TAG: /* NumE */0,
+                      _0: 5
+                    },
+                    tl: /* [] */0
+                  }
+                }
+              },
+              resultExpr: {
+                TAG: /* NumE */0,
+                _0: 3
+              }
+            },
+            tl: /* [] */0
+          }
+        }
+      }
+    }, "parseExpression for cond statement");
+
+CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(number? 1)")))), "true", "check expect buildin proc is number");
+
+CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(remainder 4 2)")))), "0", "check expect buildin proc remainder");
+
+CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(equal? 1 1)")))), "true", "check expect buildin proc equal?");
+
+CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(cons 1 empty)")))), "(cons 1 empty)", "check expect buildin proc cons");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(cond ((= 7 8) 6) (true 4))"), {
+      hd: "4",
+      tl: /* [] */0
+    }, "rackette of cond expr");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(+ 3 false)");
+      }), "invalid input addition");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(+ 3 false 4)");
+      }), "syntax error for builtin proc or closure");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(- 3 4 5)");
+      }), "syntax error for builtin proc or closure");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(* true false)");
+      }), "invalid input multiplication");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(/ true false)");
+      }), "invalid input division");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(= 3)");
+      }), "invalid input num equal");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(> 1)");
+      }), "invalid input greater than");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(< 1 true)");
+      }), "invalid input less than");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(>= 1)");
+      }), "invalid input greater than or equal to");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(<= 1)");
+      }), "invalid input less than or equal to");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(equal? 1 2 3)");
+      }), "syntax error for builtin proc or closure");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(number? 1 2)");
+      }), "invalid input isnum must be one argument");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(zero? 1 2)");
+      }), "invalid input is input zero, must be one argument num");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(cons 1)");
+      }), "invalid input expect two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(cons 1 2)");
+      }), "invalid input second item must be list");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(first 1)");
+      }), "invalid input first must be a list");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(rest 1)");
+      }), "invalid input rest must be a list");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(empty? 5)");
+      }), "invalid input empty? must be a list");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(cons? 2)");
+      }), "invalid input cons? must be a list");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(not 2)");
+      }), "invalid input not must be a boolean");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("()");
+      }), "rackette cannot handle an empty list");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(lambda x y)");
+      }), "invalid input lambdaHelp");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(let (4 x) 4)");
+      }), "invalid input letHelp needs ListC(SymbolC(string)...)");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(let x y)");
+      }), "letHelp must take in a list of concrete program pieces");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(let (x y))");
+      }), "let: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(cond)");
+      }), "cond needs a list of bool, expr pairs");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(and true)");
+      }), "and: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(and 5 true)");
+      }), "and expects two bool expr");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(and)");
+      }), "and: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(or 5)");
+      }), "or: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(or 5 6)");
+      }), "or expects two bool expr");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(lambda 5)");
+      }), "lambda: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(lambda)");
+      }), "lambda: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(let 5)");
+      }), "let: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(let)");
+      }), "let: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(define 6 7)");
+      }), "define expects variable name followed by expression: incorrect format");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(if 9 9 0)");
+      }), "if-expr must eval to bool");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(cond (false 6) (8 true))");
+      }), "condition expr of cond must eval to bool");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(if true)");
+      }), "expected three arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(cond (false 6) (8 true))");
+      }), "condition expr of cond must eval to bool");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(cond (false 6) (8 7))");
+      }), "condition expr of cond must eval to bool");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(define x 7)(define x 8)");
+      }), "name already bound to value");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(define x 7)(define x 8)");
+      }), "name already bound to value");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(define x 7)(define x 8)");
+      }), "name already bound to value");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(define x 7)(define x 8)");
+      }), "name already bound to value");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(3 4 5)");
+      }), "syntax error for builtin proc or closure");
 
 exports.plus = plus;
 exports.subtraction = subtraction;
@@ -1418,11 +2079,10 @@ exports.parsePiece = parsePiece;
 exports.parse = parse;
 exports.extendEnv = extendEnv;
 exports.defLookUp = defLookUp;
+exports.letPairHelper = letPairHelper;
 exports.$$eval = $$eval;
 exports.addDefinition = addDefinition;
 exports.stringOfValue = stringOfValue;
-exports.addBinding = addBinding;
-exports.readName = readName;
 exports.$$process = $$process;
 exports.rackette = rackette;
 /*  Not a pure module */

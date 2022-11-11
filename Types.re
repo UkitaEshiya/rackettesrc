@@ -20,32 +20,32 @@ type expression =
   | AndE(expression, expression)
   | OrE(expression, expression)
   | IfE(ifData)
-  | CondE(list(condData)) 
+  | CondE(list(condData))
   | LambdaE(lambdaData)
   | LetE(letData)
   | ApplicationE(list(expression))
-  and ifData = {
-    boolExpr: expression,
-    trueExpr: expression,
-    falseExpr: expression,
-  }
-  and condData = { 
-    conditionExpr: expression, 
-    resultExpr: expression,
-  }
-  and lambdaData = {
-    nameList: list(name),
-    lambdaBody: expression,
-  } 
-  and letPair = {
-    pairName: name, 
-    pairExpr: expression,  
-  }
-  and letData = {
-    letPairs: list(letPair),
-    letBody: expression,
-  }
-  
+and ifData = {
+  boolExpr: expression,
+  trueExpr: expression,
+  falseExpr: expression,
+}
+and condData = {
+  conditionExpr: expression,
+  resultExpr: expression,
+}
+and lambdaData = {
+  nameList: list(name),
+  lambdaBody: expression,
+}
+and letPair = {
+  pairName: name,
+  pairExpr: expression,
+}
+and letData = {
+  letPairs: list(letPair),
+  letBody: expression,
+};
+
 /* a Rackette definition */
 type definition = (name, expression);
 
@@ -66,17 +66,17 @@ type value =
   | ListV(list(value))
   | BuiltinV(builtinData)
   | ClosureV(closureData)
-  and builtinData = { 
-    printedRep: string,
-    bProc: list(value) => value,
-  }
-  and closureData = {
-    cNameList: list(name),
-    cExpr: expression, 
-    cEnv: environment,
-  }
-  /* Environments and bindings aren't values
-     But we use "and" here so bindings have access to values
-     and closures have access to environments */
-  and environment = (list(binding))
-  and binding = (name, value);
+and builtinData = {
+  printedRep: string,
+  bProc: list(value) => value,
+}
+and closureData = {
+  cNameList: list(name),
+  cExpr: expression,
+  cEnv: environment,
+}
+/* Environments and bindings aren't values
+   But we use "and" here so bindings have access to values
+   and closures have access to environments */
+and environment = list(binding)
+and binding = (name, value);
