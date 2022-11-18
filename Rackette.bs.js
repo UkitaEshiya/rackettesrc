@@ -1004,128 +1004,108 @@ function parseExpression(_cpe) {
           switch (x$1.TAG | 0) {
             case /* SymbolC */1 :
                 var x$2 = x$1._0;
-                var exit = 0;
-                if (x$2 === "if") {
-                  var match = lst.tl;
-                  if (!match) {
-                    return Pervasives.failwith("expected three arguments");
-                  }
-                  var match$1 = match.tl;
-                  if (!match$1) {
-                    return Pervasives.failwith("expected three arguments");
-                  }
-                  var match$2 = match$1.tl;
-                  if (match$2 && !match$2.tl) {
-                    return {
-                            TAG: /* IfE */5,
-                            _0: {
-                              boolExpr: parseExpression(match.hd),
-                              trueExpr: parseExpression(match$1.hd),
-                              falseExpr: parseExpression(match$2.hd)
-                            }
-                          };
-                  } else {
-                    return Pervasives.failwith("expected three arguments");
-                  }
-                }
-                var match$3 = lst.tl;
-                if (match$3) {
-                  var match$4 = match$3.tl;
-                  if (match$4 && !match$4.tl) {
-                    var exp2 = match$4.hd;
-                    var exp1 = match$3.hd;
-                    switch (x$2) {
-                      case "and" :
-                          return {
-                                  TAG: /* AndE */3,
-                                  _0: parseExpression(exp1),
-                                  _1: parseExpression(exp2)
-                                };
-                      case "cond" :
-                          return {
-                                  TAG: /* CondE */6,
-                                  _0: condHelp({
-                                        hd: exp1,
-                                        tl: {
-                                          hd: exp2,
-                                          tl: /* [] */0
-                                        }
-                                      })
-                                };
-                      case "lambda" :
-                          return {
-                                  TAG: /* LambdaE */7,
-                                  _0: {
-                                    nameList: lambdaHelp(exp1),
-                                    lambdaBody: parseExpression(exp2)
-                                  }
-                                };
-                      case "let" :
-                          return {
-                                  TAG: /* LetE */8,
-                                  _0: {
-                                    letPairs: letHelp(exp1),
-                                    letBody: parseExpression(exp2)
-                                  }
-                                };
-                      case "or" :
-                          return {
-                                  TAG: /* OrE */4,
-                                  _0: parseExpression(exp1),
-                                  _1: parseExpression(exp2)
-                                };
-                      default:
-                        return {
-                                TAG: /* ApplicationE */9,
-                                _0: {
-                                  hd: {
-                                    TAG: /* NameE */2,
-                                    _0: /* Name */{
-                                      _0: x$2
-                                    }
-                                  },
-                                  tl: {
-                                    hd: parseExpression(exp1),
-                                    tl: {
-                                      hd: parseExpression(exp2),
-                                      tl: /* [] */0
-                                    }
-                                  }
-                                }
-                              };
-                    }
-                  } else {
-                    exit = 2;
-                  }
-                } else {
-                  exit = 2;
-                }
-                if (exit === 2) {
-                  switch (x$2) {
-                    case "and" :
+                switch (x$2) {
+                  case "and" :
+                      var match = lst.tl;
+                      if (!match) {
                         return Pervasives.failwith("and: expected two arguments");
-                    case "cond" :
+                      }
+                      var match$1 = match.tl;
+                      if (match$1 && !match$1.tl) {
                         return {
-                                TAG: /* CondE */6,
-                                _0: condHelp(lst.tl)
+                                TAG: /* AndE */3,
+                                _0: parseExpression(match.hd),
+                                _1: parseExpression(match$1.hd)
                               };
-                    case "lambda" :
-                        return Pervasives.failwith("lambda: expected two arguments");
-                    case "let" :
-                        return Pervasives.failwith("let: expected two arguments");
-                    case "or" :
-                        return Pervasives.failwith("or: expected two arguments");
-                    default:
-                      if (!lst.tl) {
+                      } else {
+                        return Pervasives.failwith("and: expected two arguments");
+                      }
+                  case "cond" :
+                      return {
+                              TAG: /* CondE */6,
+                              _0: condHelp(lst.tl)
+                            };
+                  case "if" :
+                      var match$2 = lst.tl;
+                      if (!match$2) {
+                        return Pervasives.failwith("expected three arguments");
+                      }
+                      var match$3 = match$2.tl;
+                      if (!match$3) {
+                        return Pervasives.failwith("expected three arguments");
+                      }
+                      var match$4 = match$3.tl;
+                      if (match$4 && !match$4.tl) {
                         return {
-                                TAG: /* NameE */2,
-                                _0: /* Name */{
-                                  _0: x$2
+                                TAG: /* IfE */5,
+                                _0: {
+                                  boolExpr: parseExpression(match$2.hd),
+                                  trueExpr: parseExpression(match$3.hd),
+                                  falseExpr: parseExpression(match$4.hd)
                                 }
                               };
+                      } else {
+                        return Pervasives.failwith("expected three arguments");
                       }
-                      
-                  }
+                  case "lambda" :
+                      var match$5 = lst.tl;
+                      if (!match$5) {
+                        return Pervasives.failwith("lambda: expected two arguments");
+                      }
+                      var match$6 = match$5.tl;
+                      if (match$6 && !match$6.tl) {
+                        return {
+                                TAG: /* LambdaE */7,
+                                _0: {
+                                  nameList: lambdaHelp(match$5.hd),
+                                  lambdaBody: parseExpression(match$6.hd)
+                                }
+                              };
+                      } else {
+                        return Pervasives.failwith("lambda: expected two arguments");
+                      }
+                  case "let" :
+                      var match$7 = lst.tl;
+                      if (!match$7) {
+                        return Pervasives.failwith("let: expected two arguments");
+                      }
+                      var match$8 = match$7.tl;
+                      if (match$8 && !match$8.tl) {
+                        return {
+                                TAG: /* LetE */8,
+                                _0: {
+                                  letPairs: letHelp(match$7.hd),
+                                  letBody: parseExpression(match$8.hd)
+                                }
+                              };
+                      } else {
+                        return Pervasives.failwith("let: expected two arguments");
+                      }
+                  case "or" :
+                      var match$9 = lst.tl;
+                      if (!match$9) {
+                        return Pervasives.failwith("or: expected two arguments");
+                      }
+                      var match$10 = match$9.tl;
+                      if (match$10 && !match$10.tl) {
+                        return {
+                                TAG: /* OrE */4,
+                                _0: parseExpression(match$9.hd),
+                                _1: parseExpression(match$10.hd)
+                              };
+                      } else {
+                        return Pervasives.failwith("or: expected two arguments");
+                      }
+                  default:
+                    if (!lst.tl) {
+                      return {
+                              TAG: /* NameE */2,
+                              _0: /* Name */{
+                                _0: x$2
+                              }
+                            };
+                    }
+                    
                 }
                 break;
             case /* NumberC */0 :
@@ -1137,16 +1117,10 @@ function parseExpression(_cpe) {
           if (tl) {
             return {
                     TAG: /* ApplicationE */9,
-                    _0: {
-                      hd: parseExpression(x$1),
-                      tl: {
-                        hd: parseExpression({
-                              TAG: /* ListC */2,
-                              _0: tl
-                            }),
-                        tl: /* [] */0
-                      }
-                    }
+                    _0: List.map(parseExpression, {
+                          hd: x$1,
+                          tl: tl
+                        })
                   };
           }
           _cpe = x$1;
@@ -1282,11 +1256,30 @@ function letPairHelper(tle, local, lst) {
         };
 }
 
+function closureBindingsHelp(tle, local, names, exps) {
+  if (names) {
+    if (exps) {
+      return {
+              hd: [
+                names.hd,
+                $$eval(tle, local, exps.hd)
+              ],
+              tl: closureBindingsHelp(tle, local, names.tl, exps.tl)
+            };
+    } else {
+      return Pervasives.failwith("closureBindingsHelp: the given lists must be of equal length");
+    }
+  } else if (exps) {
+    return Pervasives.failwith("closureBindingsHelp: the given lists must be of equal length");
+  } else {
+    return /* [] */0;
+  }
+}
+
 function $$eval(tle, _local, _expr) {
   while(true) {
     var expr = _expr;
     var local = _local;
-    var allEnv = List.append(local, tle);
     if (typeof expr === "number") {
       return {
               TAG: /* ListV */2,
@@ -1305,7 +1298,7 @@ function $$eval(tle, _local, _expr) {
                   _0: expr._0
                 };
       case /* NameE */2 :
-          var va = defLookUp(allEnv, expr._0);
+          var va = defLookUp(List.append(local, tle), expr._0);
           if (va !== undefined) {
             return va;
           } else {
@@ -1416,13 +1409,22 @@ function $$eval(tle, _local, _expr) {
           if (!match$7) {
             return Pervasives.failwith("cond expr or app expr cannot contain empty list");
           }
-          var hd$1 = $$eval(tle, local, match$7.hd);
-          if (hd$1.TAG === /* BuiltinV */3) {
-            return Curry._1(hd$1._0.bProc, List.map((function (param) {
-                              return $$eval(tle, /* [] */0, param);
-                            }), match$7.tl));
-          } else {
-            return Pervasives.failwith("syntax error for builtin proc or closure");
+          var tl = match$7.tl;
+          var x = $$eval(tle, local, match$7.hd);
+          switch (x.TAG | 0) {
+            case /* BuiltinV */3 :
+                return Curry._1(x._0.bProc, List.map((function(local){
+                              return function (expr) {
+                                return $$eval(tle, local, expr);
+                              }
+                              }(local)), tl));
+            case /* ClosureV */4 :
+                var x$1 = x._0;
+                _expr = x$1.cExpr;
+                _local = List.append(List.append(closureBindingsHelp(tle, local, x$1.cNameList, tl), x$1.cEnv), local);
+                continue ;
+            default:
+              return Pervasives.failwith("syntax error for builtin proc or closure");
           }
       
     }
@@ -1505,122 +1507,105 @@ CS17SetupRackette$Rackette.checkExpectExpression(parseExpression({
 
 CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("empty")), /* EmptyE */0, "read and parse empty expression");
 
-CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("empty")))), "empty", "read all the way for empty");
+CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("true")), {
+      TAG: /* BoolE */1,
+      _0: true
+    }, "read and parse true");
 
-CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("1")))), "1", "read all the way for a num");
+CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("false")), {
+      TAG: /* BoolE */1,
+      _0: false
+    }, "read and parse false");
 
-CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("(+ 1 5)")), {
-      TAG: /* ApplicationE */9,
-      _0: {
-        hd: {
-          TAG: /* NameE */2,
-          _0: /* Name */{
-            _0: "+"
-          }
-        },
-        tl: {
-          hd: {
-            TAG: /* NumE */0,
-            _0: 1
-          },
-          tl: {
-            hd: {
-              TAG: /* NumE */0,
-              _0: 5
-            },
-            tl: /* [] */0
-          }
-        }
+CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("x")), {
+      TAG: /* NameE */2,
+      _0: /* Name */{
+        _0: "x"
       }
-    }, "read and parse 1 + 5");
+    }, "read and parse a name");
 
-CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(+ 1 5)")))), "6", "stringOfValue buildin proc +");
-
-CS17SetupRackette$Rackette.checkExpect(rackette("(+ 1 5)"), {
-      hd: "6",
-      tl: /* [] */0
-    }, "rackette of buildin proc");
-
-CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("(let ((x 5)) x)")), {
-      TAG: /* LetE */8,
-      _0: {
-        letPairs: {
-          hd: {
-            pairName: /* Name */{
-              _0: "x"
-            },
-            pairExpr: {
-              TAG: /* NumE */0,
-              _0: 5
-            }
-          },
+CS17SetupRackette$Rackette.checkExpectAbstractProgram(List.map(parsePiece, {
+          hd: Read$Rackette.Reader.read("(if (positive? -5) (3) 2)"),
           tl: /* [] */0
-        },
-        letBody: {
-          TAG: /* NameE */2,
-          _0: /* Name */{
-            _0: "x"
-          }
-        }
-      }
-    }, "read and parse for let expression");
-
-CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("(let ((x 5)(y 3))(+ x y))")), {
-      TAG: /* LetE */8,
-      _0: {
-        letPairs: {
-          hd: {
-            pairName: /* Name */{
-              _0: "x"
-            },
-            pairExpr: {
-              TAG: /* NumE */0,
-              _0: 5
-            }
-          },
-          tl: {
-            hd: {
-              pairName: /* Name */{
-                _0: "y"
-              },
-              pairExpr: {
-                TAG: /* NumE */0,
-                _0: 3
-              }
-            },
-            tl: /* [] */0
-          }
-        },
-        letBody: {
-          TAG: /* ApplicationE */9,
+        }), {
+      hd: {
+        TAG: /* Expression */1,
+        _0: {
+          TAG: /* IfE */5,
           _0: {
-            hd: {
-              TAG: /* NameE */2,
-              _0: /* Name */{
-                _0: "+"
-              }
-            },
-            tl: {
-              hd: {
-                TAG: /* NameE */2,
-                _0: /* Name */{
-                  _0: "x"
-                }
-              },
-              tl: {
+            boolExpr: {
+              TAG: /* ApplicationE */9,
+              _0: {
                 hd: {
                   TAG: /* NameE */2,
                   _0: /* Name */{
-                    _0: "y"
+                    _0: "positive?"
                   }
                 },
-                tl: /* [] */0
+                tl: {
+                  hd: {
+                    TAG: /* NumE */0,
+                    _0: -5
+                  },
+                  tl: /* [] */0
+                }
               }
+            },
+            trueExpr: {
+              TAG: /* NumE */0,
+              _0: 3
+            },
+            falseExpr: {
+              TAG: /* NumE */0,
+              _0: 2
             }
           }
         }
-      }
-    }, "read and parse for let expression");
+      },
+      tl: /* [] */0
+    }, "read and parse for if statement");
+
+CS17SetupRackette$Rackette.checkExpectAbstractProgram(List.map(parsePiece, {
+          hd: Read$Rackette.Reader.read("(and true 5)"),
+          tl: /* [] */0
+        }), {
+      hd: {
+        TAG: /* Expression */1,
+        _0: {
+          TAG: /* AndE */3,
+          _0: {
+            TAG: /* BoolE */1,
+            _0: true
+          },
+          _1: {
+            TAG: /* NumE */0,
+            _0: 5
+          }
+        }
+      },
+      tl: /* [] */0
+    }, "read and parse for and statement");
+
+CS17SetupRackette$Rackette.checkExpectAbstractProgram(List.map(parsePiece, {
+          hd: Read$Rackette.Reader.read("(or false 5)"),
+          tl: /* [] */0
+        }), {
+      hd: {
+        TAG: /* Expression */1,
+        _0: {
+          TAG: /* OrE */4,
+          _0: {
+            TAG: /* BoolE */1,
+            _0: false
+          },
+          _1: {
+            TAG: /* NumE */0,
+            _0: 5
+          }
+        }
+      },
+      tl: /* [] */0
+    }, "read and parse for and statement");
 
 CS17SetupRackette$Rackette.checkExpectAbstractProgram(List.map(parsePiece, {
           hd: Read$Rackette.Reader.read("(lambda (x) x)"),
@@ -1703,72 +1688,86 @@ CS17SetupRackette$Rackette.checkExpectAbstractProgram(List.map(parsePiece, {
       tl: /* [] */0
     }, "read and parse for lambda expressions with two names");
 
-CS17SetupRackette$Rackette.checkExpectAbstractProgram(List.map(parsePiece, {
-          hd: Read$Rackette.Reader.read("(if (positive? -5) (3) 2)"),
+CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("(let ((x 5)) x)")), {
+      TAG: /* LetE */8,
+      _0: {
+        letPairs: {
+          hd: {
+            pairName: /* Name */{
+              _0: "x"
+            },
+            pairExpr: {
+              TAG: /* NumE */0,
+              _0: 5
+            }
+          },
           tl: /* [] */0
-        }), {
-      hd: {
-        TAG: /* Expression */1,
-        _0: {
-          TAG: /* IfE */5,
+        },
+        letBody: {
+          TAG: /* NameE */2,
+          _0: /* Name */{
+            _0: "x"
+          }
+        }
+      }
+    }, "read and parse for let expression");
+
+CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("(let ((x 5)(y 3))(+ x y))")), {
+      TAG: /* LetE */8,
+      _0: {
+        letPairs: {
+          hd: {
+            pairName: /* Name */{
+              _0: "x"
+            },
+            pairExpr: {
+              TAG: /* NumE */0,
+              _0: 5
+            }
+          },
+          tl: {
+            hd: {
+              pairName: /* Name */{
+                _0: "y"
+              },
+              pairExpr: {
+                TAG: /* NumE */0,
+                _0: 3
+              }
+            },
+            tl: /* [] */0
+          }
+        },
+        letBody: {
+          TAG: /* ApplicationE */9,
           _0: {
-            boolExpr: {
-              TAG: /* ApplicationE */9,
-              _0: {
+            hd: {
+              TAG: /* NameE */2,
+              _0: /* Name */{
+                _0: "+"
+              }
+            },
+            tl: {
+              hd: {
+                TAG: /* NameE */2,
+                _0: /* Name */{
+                  _0: "x"
+                }
+              },
+              tl: {
                 hd: {
                   TAG: /* NameE */2,
                   _0: /* Name */{
-                    _0: "positive?"
+                    _0: "y"
                   }
                 },
-                tl: {
-                  hd: {
-                    TAG: /* NumE */0,
-                    _0: -5
-                  },
-                  tl: /* [] */0
-                }
+                tl: /* [] */0
               }
-            },
-            trueExpr: {
-              TAG: /* NumE */0,
-              _0: 3
-            },
-            falseExpr: {
-              TAG: /* NumE */0,
-              _0: 2
             }
           }
         }
-      },
-      tl: /* [] */0
-    }, "read and parse for if statement");
-
-CS17SetupRackette$Rackette.checkExpectAbstractProgram(List.map(parsePiece, {
-          hd: Read$Rackette.Reader.read("(and true 5)"),
-          tl: /* [] */0
-        }), {
-      hd: {
-        TAG: /* Expression */1,
-        _0: {
-          TAG: /* AndE */3,
-          _0: {
-            TAG: /* BoolE */1,
-            _0: true
-          },
-          _1: {
-            TAG: /* NumE */0,
-            _0: 5
-          }
-        }
-      },
-      tl: /* [] */0
-    }, "read and parse for and statement");
-
-CS17SetupRackette$Rackette.checkExpect(rackette("(and true false)"), {
-      hd: "false",
-      tl: /* [] */0
-    }, "read and parse for and statement");
+      }
+    }, "read and parse for let expression with two let pairs");
 
 CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("(cond\n   ((positive? -5) 1)\n   ((zero? -5) 2)\n   ((positive? 5) 3))")), {
       TAG: /* CondE */6,
@@ -1853,6 +1852,131 @@ CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.R
       }
     }, "parseExpression for cond statement");
 
+CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("(+ 1 5)")), {
+      TAG: /* ApplicationE */9,
+      _0: {
+        hd: {
+          TAG: /* NameE */2,
+          _0: /* Name */{
+            _0: "+"
+          }
+        },
+        tl: {
+          hd: {
+            TAG: /* NumE */0,
+            _0: 1
+          },
+          tl: {
+            hd: {
+              TAG: /* NumE */0,
+              _0: 5
+            },
+            tl: /* [] */0
+          }
+        }
+      }
+    }, "read and parse 1 + 5");
+
+CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("((lambda (x y) (+ x y)) 2 3 5)")), {
+      TAG: /* ApplicationE */9,
+      _0: {
+        hd: {
+          TAG: /* LambdaE */7,
+          _0: {
+            nameList: {
+              hd: /* Name */{
+                _0: "x"
+              },
+              tl: {
+                hd: /* Name */{
+                  _0: "y"
+                },
+                tl: /* [] */0
+              }
+            },
+            lambdaBody: {
+              TAG: /* ApplicationE */9,
+              _0: {
+                hd: {
+                  TAG: /* NameE */2,
+                  _0: /* Name */{
+                    _0: "+"
+                  }
+                },
+                tl: {
+                  hd: {
+                    TAG: /* NameE */2,
+                    _0: /* Name */{
+                      _0: "x"
+                    }
+                  },
+                  tl: {
+                    hd: {
+                      TAG: /* NameE */2,
+                      _0: /* Name */{
+                        _0: "y"
+                      }
+                    },
+                    tl: /* [] */0
+                  }
+                }
+              }
+            }
+          }
+        },
+        tl: {
+          hd: {
+            TAG: /* NumE */0,
+            _0: 2
+          },
+          tl: {
+            hd: {
+              TAG: /* NumE */0,
+              _0: 3
+            },
+            tl: {
+              hd: {
+                TAG: /* NumE */0,
+                _0: 5
+              },
+              tl: /* [] */0
+            }
+          }
+        }
+      }
+    }, "lambda");
+
+CS17SetupRackette$Rackette.checkExpectExpression(parseExpression(Read$Rackette.Reader.read("(2 3 5)")), {
+      TAG: /* ApplicationE */9,
+      _0: {
+        hd: {
+          TAG: /* NumE */0,
+          _0: 2
+        },
+        tl: {
+          hd: {
+            TAG: /* NumE */0,
+            _0: 3
+          },
+          tl: {
+            hd: {
+              TAG: /* NumE */0,
+              _0: 5
+            },
+            tl: /* [] */0
+          }
+        }
+      }
+    }, "lambda");
+
+CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(+ 1 5)")))), "6", "stringOfValue buildin proc +");
+
+CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("empty")))), "empty", "read all the way for empty");
+
+CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("1")))), "1", "read all the way for a num");
+
+CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("1")))), "1", "read all the way for a num");
+
 CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(number? 1)")))), "true", "check expect buildin proc is number");
 
 CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(remainder 4 2)")))), "0", "check expect buildin proc remainder");
@@ -1861,25 +1985,145 @@ CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */
 
 CS17SetupRackette$Rackette.checkExpect(stringOfValue($$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(cons 1 empty)")))), "(cons 1 empty)", "check expect buildin proc cons");
 
+CS17SetupRackette$Rackette.checkExpect(rackette("1"), {
+      hd: "1",
+      tl: /* [] */0
+    }, "rackette of a number");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("true"), {
+      hd: "true",
+      tl: /* [] */0
+    }, "rackette of a bool");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("empty"), {
+      hd: "empty",
+      tl: /* [] */0
+    }, "rackette empty");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(or (= 3 5)(= 2 2))"), {
+      hd: "true",
+      tl: /* [] */0
+    }, "rackette or");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(and true false)"), {
+      hd: "false",
+      tl: /* [] */0
+    }, "rackette and");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(if (zero? -5) 3 2)"), {
+      hd: "2",
+      tl: /* [] */0
+    }, "rackette if");
+
 CS17SetupRackette$Rackette.checkExpect(rackette("(cond ((= 7 8) 6) (true 4))"), {
       hd: "4",
       tl: /* [] */0
     }, "rackette of cond expr");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(+ 1 5)(- 3 4)(* 8 9)(/ 8 4)(remainder 9 4)(< 7 8)(> 9 0)\n  (<= 9 3)(>= 5 5)"), {
+      hd: "6",
+      tl: {
+        hd: "-1",
+        tl: {
+          hd: "72",
+          tl: {
+            hd: "2",
+            tl: {
+              hd: "1",
+              tl: {
+                hd: "true",
+                tl: {
+                  hd: "true",
+                  tl: {
+                    hd: "false",
+                    tl: {
+                      hd: "true",
+                      tl: /* [] */0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }, "rackette of builtin proc");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(and (equal? 7 8)(number? 90))"), {
+      hd: "false",
+      tl: /* [] */0
+    }, "rackette of nested builtin proc bool");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(+ 1 (- 3 (* 8 (/ 8 4))))"), {
+      hd: "-12",
+      tl: /* [] */0
+    }, "rackette of nested builtin proc");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(cons (zero? 0)(cons (first (cons 2 empty)) empty))"), {
+      hd: "(cons true (cons 2 empty))",
+      tl: /* [] */0
+    }, "rackette of cons of nested builtin proc");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(empty? (rest (cons 8 ( cons true empty))))"), {
+      hd: "false",
+      tl: /* [] */0
+    }, "rackette of nested builtin proc 2");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(define nineLengthen (lambda (n alon)\n  (if (= n 9) (cons n alon) alon))) (nineLengthen 9 empty)"), {
+      hd: "(cons 9 empty)",
+      tl: /* [] */0
+    }, "rackette of def and application exp");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(define nineLengthen (lambda (n alon)\n  (if (= n 9) (cons n alon) alon))) \n  (let ((x 8)(y 0)) (nineLengthen x (cons 8 (cons y empty))))"), {
+      hd: "(cons 8 (cons 0 empty))",
+      tl: /* [] */0
+    }, "rackette of def and application exp");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(lambda (n alon) (nineLengthen x (cons 8 (cons y empty))))"), {
+      hd: "user-defined procedure",
+      tl: /* [] */0
+    }, "rackette of user-defined");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("((lambda (x y) ((lambda (y) (+ x y)) x)) 17 18)"), {
+      hd: "34",
+      tl: /* [] */0
+    }, "rackette of nested lambda");
+
+CS17SetupRackette$Rackette.checkExpect(rackette("(not (not (not true)))"), {
+      hd: "false",
+      tl: /* [] */0
+    }, "rackette of not");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(+ 3 false)");
       }), "invalid input addition");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(+ 3 false)")));
+      }), "invalid input addition");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(+ 3 false 4)");
-      }), "syntax error for builtin proc or closure");
+      }), "invalid input addition");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(+ 3 false 4)")));
+      }), "invalid input addition");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(- 3 4 5)");
-      }), "syntax error for builtin proc or closure");
+      }), "invalid input subtraction");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(- 3 4 5)")));
+      }), "invalid input subtraction");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(* true false)");
+      }), "invalid input multiplication");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(* true false)")));
       }), "invalid input multiplication");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -1887,7 +2131,15 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "invalid input division");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(/ true false)")));
+      }), "invalid input division");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(= 3)");
+      }), "invalid input num equal");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(= 3)")));
       }), "invalid input num equal");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -1895,7 +2147,15 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "invalid input greater than");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(> 3)")));
+      }), "invalid input greater than");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(< 1 true)");
+      }), "invalid input less than");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(< 1 true)")));
       }), "invalid input less than");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -1903,15 +2163,31 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "invalid input greater than or equal to");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(>= 1)")));
+      }), "invalid input greater than or equal to");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(<= 1)");
       }), "invalid input less than or equal to");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(<= 1)")));
+      }), "invalid input less than or equal to");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(equal? 1 2 3)");
-      }), "syntax error for builtin proc or closure");
+      }), "invalid input equality");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(equal? 1 2 3)")));
+      }), "invalid input equality");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(number? 1 2)");
+      }), "invalid input isnum must be one argument");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(number? 1 2)")));
       }), "invalid input isnum must be one argument");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -1919,7 +2195,23 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "invalid input is input zero, must be one argument num");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(zero? true)");
+      }), "invalid input is input zero, must be one argument num");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(zero? 1 2)")));
+      }), "invalid input is input zero, must be one argument num");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(zero? true)")));
+      }), "invalid input is input zero, must be one argument num");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(cons 1)");
+      }), "invalid input expect two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(cons 1)")));
       }), "invalid input expect two arguments");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -1927,7 +2219,15 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "invalid input second item must be list");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(cons 1 2)")));
+      }), "invalid input second item must be list");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(first 1)");
+      }), "invalid input first must be a list");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(first 1)")));
       }), "invalid input first must be a list");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -1935,7 +2235,15 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "invalid input rest must be a list");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(rest 1)")));
+      }), "invalid input rest must be a list");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(empty? 5)");
+      }), "invalid input empty? must be a list");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(empty? 5)")));
       }), "invalid input empty? must be a list");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -1943,7 +2251,15 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "invalid input cons? must be a list");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(cons? 2)")));
+      }), "invalid input cons? must be a list");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(not 2)");
+      }), "invalid input not must be a boolean");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(not 2)")));
       }), "invalid input not must be a boolean");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -1955,7 +2271,23 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "invalid input lambdaHelp");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(lambda x y)")));
+      }), "invalid input lambdaHelp");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return parseExpression(Read$Rackette.Reader.read("(lambda x y)"));
+      }), "invalid input lambdaHelp");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(let (4 x) 4)");
+      }), "invalid input letHelp needs ListC(SymbolC(string)...)");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(let (4 x) 4)")));
+      }), "invalid input letHelp needs ListC(SymbolC(string)...)");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return parseExpression(Read$Rackette.Reader.read("(let (4 x) 4)"));
       }), "invalid input letHelp needs ListC(SymbolC(string)...)");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -1963,7 +2295,23 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "letHelp must take in a list of concrete program pieces");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(let x y)")));
+      }), "letHelp must take in a list of concrete program pieces");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return parseExpression(Read$Rackette.Reader.read("(let x y)"));
+      }), "letHelp must take in a list of concrete program pieces");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(let (x y))");
+      }), "let: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(let (x y))")));
+      }), "let: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return parseExpression(Read$Rackette.Reader.read("(let (x y))"));
       }), "let: expected two arguments");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -1971,7 +2319,35 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "cond needs a list of bool, expr pairs");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(cond)")));
+      }), "cond needs a list of bool, expr pairs");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return parseExpression(Read$Rackette.Reader.read("(cond)"));
+      }), "cond needs a list of bool, expr pairs");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(and true)");
+      }), "and: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("(and)");
+      }), "and: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(and true)")));
+      }), "and: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(and)")));
+      }), "and: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return parseExpression(Read$Rackette.Reader.read("(and true)"));
+      }), "and: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return parseExpression(Read$Rackette.Reader.read("(and)"));
       }), "and: expected two arguments");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -1979,11 +2355,19 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "and expects two bool expr");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
-        return rackette("(and)");
-      }), "and: expected two arguments");
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(and 5 true)")));
+      }), "and expects two bool expr");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(or 5)");
+      }), "or: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(or 5)")));
+      }), "or: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return parseExpression(Read$Rackette.Reader.read("(or 5)"));
       }), "or: expected two arguments");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -1991,7 +2375,15 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "or expects two bool expr");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, parseExpression(Read$Rackette.Reader.read("(or 5 6)")));
+      }), "or expects two bool expr");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(lambda 5)");
+      }), "lambda: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return List.map(parsePiece, Read$Rackette.Reader.readAll("(lambda 5)"));
       }), "lambda: expected two arguments");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -1999,7 +2391,45 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "lambda: expected two arguments");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return List.map(parsePiece, {
+                    hd: {
+                      TAG: /* ListC */2,
+                      _0: {
+                        hd: {
+                          TAG: /* SymbolC */1,
+                          _0: "lambda"
+                        },
+                        tl: /* [] */0
+                      }
+                    },
+                    tl: /* [] */0
+                  });
+      }), "lambda: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(let 5)");
+      }), "let: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return List.map(parsePiece, {
+                    hd: {
+                      TAG: /* ListC */2,
+                      _0: {
+                        hd: {
+                          TAG: /* SymbolC */1,
+                          _0: "let"
+                        },
+                        tl: {
+                          hd: {
+                            TAG: /* NumberC */0,
+                            _0: 5
+                          },
+                          tl: /* [] */0
+                        }
+                      }
+                    },
+                    tl: /* [] */0
+                  });
       }), "let: expected two arguments");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -2007,7 +2437,40 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "let: expected two arguments");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
+        return List.map(parsePiece, Read$Rackette.Reader.readAll("(let)"));
+      }), "let: expected two arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(define 6 7)");
+      }), "define expects variable name followed by expression: incorrect format");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return List.map(parsePiece, Read$Rackette.Reader.readAll("(define 6 7)"));
+      }), "define expects variable name followed by expression: incorrect format");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return parseDefinition({
+                    TAG: /* ListC */2,
+                    _0: {
+                      hd: {
+                        TAG: /* SymbolC */1,
+                        _0: "define"
+                      },
+                      tl: {
+                        hd: {
+                          TAG: /* NumberC */0,
+                          _0: 6
+                        },
+                        tl: {
+                          hd: {
+                            TAG: /* NumberC */0,
+                            _0: 7
+                          },
+                          tl: /* [] */0
+                        }
+                      }
+                    }
+                  });
       }), "define expects variable name followed by expression: incorrect format");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -2015,15 +2478,80 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "if-expr must eval to bool");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
-        return rackette("(cond (false 6) (8 true))");
-      }), "condition expr of cond must eval to bool");
+        return $$eval(initialTle, /* [] */0, {
+                    TAG: /* IfE */5,
+                    _0: {
+                      boolExpr: {
+                        TAG: /* NumE */0,
+                        _0: 9
+                      },
+                      trueExpr: {
+                        TAG: /* NumE */0,
+                        _0: 9
+                      },
+                      falseExpr: {
+                        TAG: /* NumE */0,
+                        _0: 0
+                      }
+                    }
+                  });
+      }), "if-expr must eval to bool");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(if true)");
       }), "expected three arguments");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
-        return rackette("(cond (false 6) (8 true))");
+        return List.map(parsePiece, {
+                    hd: {
+                      TAG: /* ListC */2,
+                      _0: {
+                        hd: {
+                          TAG: /* SymbolC */1,
+                          _0: "if"
+                        },
+                        tl: {
+                          hd: {
+                            TAG: /* SymbolC */1,
+                            _0: "true"
+                          },
+                          tl: /* [] */0
+                        }
+                      }
+                    },
+                    tl: /* [] */0
+                  });
+      }), "expected three arguments");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, {
+                    TAG: /* CondE */6,
+                    _0: {
+                      hd: {
+                        conditionExpr: {
+                          TAG: /* BoolE */1,
+                          _0: false
+                        },
+                        resultExpr: {
+                          TAG: /* NumE */0,
+                          _0: 6
+                        }
+                      },
+                      tl: {
+                        hd: {
+                          conditionExpr: {
+                            TAG: /* NumE */0,
+                            _0: 8
+                          },
+                          resultExpr: {
+                            TAG: /* NumE */0,
+                            _0: 7
+                          }
+                        },
+                        tl: /* [] */0
+                      }
+                    }
+                  });
       }), "condition expr of cond must eval to bool");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
@@ -2035,20 +2563,138 @@ CS17SetupRackette$Rackette.checkError((function (param) {
       }), "name already bound to value");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
-        return rackette("(define x 7)(define x 8)");
-      }), "name already bound to value");
-
-CS17SetupRackette$Rackette.checkError((function (param) {
-        return rackette("(define x 7)(define x 8)");
-      }), "name already bound to value");
-
-CS17SetupRackette$Rackette.checkError((function (param) {
-        return rackette("(define x 7)(define x 8)");
+        return $$process(List.map(parsePiece, Read$Rackette.Reader.readAll("(define x 7)(define x 8)")));
       }), "name already bound to value");
 
 CS17SetupRackette$Rackette.checkError((function (param) {
         return rackette("(3 4 5)");
       }), "syntax error for builtin proc or closure");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, {
+                    TAG: /* ApplicationE */9,
+                    _0: {
+                      hd: {
+                        TAG: /* NumE */0,
+                        _0: 3
+                      },
+                      tl: {
+                        hd: {
+                          TAG: /* NumE */0,
+                          _0: 4
+                        },
+                        tl: {
+                          hd: {
+                            TAG: /* NumE */0,
+                            _0: 5
+                          },
+                          tl: /* [] */0
+                        }
+                      }
+                    }
+                  });
+      }), "syntax error for builtin proc or closure");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return rackette("((lambda (n alon) (cons n alon)) 3 4 empty)");
+      }), "closureBindingsHelp: the given lists must be of equal length");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return $$eval(initialTle, /* [] */0, {
+                    TAG: /* ApplicationE */9,
+                    _0: {
+                      hd: {
+                        TAG: /* LambdaE */7,
+                        _0: {
+                          nameList: {
+                            hd: /* Name */{
+                              _0: "n"
+                            },
+                            tl: {
+                              hd: /* Name */{
+                                _0: "alon"
+                              },
+                              tl: /* [] */0
+                            }
+                          },
+                          lambdaBody: {
+                            TAG: /* ApplicationE */9,
+                            _0: {
+                              hd: {
+                                TAG: /* NameE */2,
+                                _0: /* Name */{
+                                  _0: "cons"
+                                }
+                              },
+                              tl: {
+                                hd: {
+                                  TAG: /* NameE */2,
+                                  _0: /* Name */{
+                                    _0: "n"
+                                  }
+                                },
+                                tl: {
+                                  hd: {
+                                    TAG: /* NameE */2,
+                                    _0: /* Name */{
+                                      _0: "alon"
+                                    }
+                                  },
+                                  tl: /* [] */0
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      tl: {
+                        hd: {
+                          TAG: /* NumE */0,
+                          _0: 3
+                        },
+                        tl: {
+                          hd: {
+                            TAG: /* NumE */0,
+                            _0: 4
+                          },
+                          tl: {
+                            hd: /* EmptyE */0,
+                            tl: /* [] */0
+                          }
+                        }
+                      }
+                    }
+                  });
+      }), "closureBindingsHelp: the given lists must be of equal length");
+
+CS17SetupRackette$Rackette.checkError((function (param) {
+        return closureBindingsHelp(initialTle, /* [] */0, {
+                    hd: /* Name */{
+                      _0: "x"
+                    },
+                    tl: {
+                      hd: /* Name */{
+                        _0: "y"
+                      },
+                      tl: /* [] */0
+                    }
+                  }, {
+                    hd: {
+                      TAG: /* NumE */0,
+                      _0: 3
+                    },
+                    tl: {
+                      hd: {
+                        TAG: /* NumE */0,
+                        _0: 4
+                      },
+                      tl: {
+                        hd: /* EmptyE */0,
+                        tl: /* [] */0
+                      }
+                    }
+                  });
+      }), "closureBindingsHelp: the given lists must be of equal length");
 
 exports.plus = plus;
 exports.subtraction = subtraction;
@@ -2080,6 +2726,7 @@ exports.parse = parse;
 exports.extendEnv = extendEnv;
 exports.defLookUp = defLookUp;
 exports.letPairHelper = letPairHelper;
+exports.closureBindingsHelp = closureBindingsHelp;
 exports.$$eval = $$eval;
 exports.addDefinition = addDefinition;
 exports.stringOfValue = stringOfValue;
